@@ -116,6 +116,7 @@ export const Sidebar = ({ data }: { data: ProcessedDebtRecord[] }) => {
           if (key === 'retencion' && !selected.includes(item.retencion ? 'SÍ' : 'NO')) return false;
           if (key === 'gestion' && !selected.includes(item.gestion ? 'SÍ' : 'NO')) return false;
           if (key === 'etiquetas' && !item.tag_list.some(t => selected.includes(t as string))) return false;
+          if (key === 'abono' && !selected.includes(item.abono)) return false;
         }
         return true;
       });
@@ -161,6 +162,7 @@ export const Sidebar = ({ data }: { data: ProcessedDebtRecord[] }) => {
       retencion: [{val: 'SÍ', isPossible: getDataExcluding(['retencion']).some(i => i.retencion)}, {val: 'NO', isPossible: getDataExcluding(['retencion']).some(i => !i.retencion)}],
       gestion: [{val: 'SÍ', isPossible: getDataExcluding(['gestion']).some(i => i.gestion)}, {val: 'NO', isPossible: getDataExcluding(['gestion']).some(i => !i.gestion)}],
       empresa: getOptionsForDimension('empresa', 'empresa'),
+      abono: [{val: 'SÍ', isPossible: getDataExcluding(['abono']).some(i => i.abono === 'SÍ')}, {val: 'NO', isPossible: getDataExcluding(['abono']).some(i => i.abono === 'NO')}],
       contrato: [], // Simplified for now to fix build
       etiquetas: []
     };
@@ -177,6 +179,7 @@ export const Sidebar = ({ data }: { data: ProcessedDebtRecord[] }) => {
     { key: 'cliente', label: 'CLIENTE' },
     { key: 'vencido', label: 'VENCIDO' },
     { key: 'retencion', label: 'RETENCIÓN' },
+    { key: 'abono', label: 'ABONO/FACT.' },
   ];
 
   return (

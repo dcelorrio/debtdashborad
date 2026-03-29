@@ -37,6 +37,7 @@ export interface ProcessedDebtRecord {
   nombre_comercial: string | null;
   vencimiento: Date;
   dias_vencidos: number;
+  abono: string;
 }
 
 export const processRecord = (record: any): ProcessedDebtRecord => {
@@ -98,6 +99,7 @@ export const processRecord = (record: any): ProcessedDebtRecord => {
     forma_pago: getMappedPayment(record.forma_pago),
     comentario: record.comentario || record.Observaciones || null,
     condicion_pago: record.condicionpago || record.condicion_pago || null,
-    nombre_comercial: record.nombre_comercial || null
+    nombre_comercial: record.nombre_comercial || null,
+    abono: record.importe < 0 ? 'SÍ' : 'NO'
   };
 };
