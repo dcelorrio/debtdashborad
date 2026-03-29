@@ -116,7 +116,7 @@ export default function App() {
             />
           </div>
           
-          <div className="col-span-2 row-span-2 flex flex-col gap-4 min-h-0">
+          <div className="col-span-2 row-span-2 flex flex-col gap-4 h-[796px]">
             <div className={`w-full h-[240px] p-4 rounded-[2.5rem] border transition-all duration-500 shrink-0 ${dark ? 'bg-slate-900/40 border-slate-800' : 'bg-white border-slate-200 shadow-2xl'}`}>
               <StatusComparisonChart data={data} filteredData={filteredData} />
             </div>
