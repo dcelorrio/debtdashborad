@@ -93,8 +93,8 @@ export const Sidebar = ({ data }: { data: ProcessedDebtRecord[] }) => {
           
           if (key === 'empresa' && !selected.includes(item.empresa)) return false;
           if (key === 'anyo' && item.anyo !== null && !selected.includes(item.anyo)) return false;
-          if (key === 'mes' && item.mes !== null && !selected.includes(item.mes)) return false;
-          if (key === 'mes_doc' && item.mes_doc !== null && !selected.includes(item.mes_doc)) return false;
+          if (key === 'mes_label' && !selected.includes(item.mes_label)) return false;
+          if (key === 'mes_doc_label' && (item.mes_doc_label === null || !selected.includes(item.mes_doc_label))) return false;
           if (key === 'forma_pago' && !selected.includes(item.forma_pago)) return false;
           if (key === 'entidad' && !selected.includes(item.entidad)) return false;
           if (key === 'cliente' && !selected.includes(item.cliente)) return false;
@@ -138,10 +138,10 @@ export const Sidebar = ({ data }: { data: ProcessedDebtRecord[] }) => {
 
     return {
       anyo: getOptionsForDimension('anyo', 'anyo'),
-      mes: getOptionsForDimension('mes', 'mes'),
+      mes_label: getOptionsForDimension('mes_label', 'mes_label'),
       forma_pago: getOptionsForDimension('forma_pago', 'forma_pago'),
       entidad: getOptionsForDimension('entidad', 'entidad'),
-      mes_doc: getOptionsForDimension('mes_doc', 'mes_doc'),
+      mes_doc_label: getOptionsForDimension('mes_doc_label', 'mes_doc_label'),
       cliente: getOptionsForDimension('cliente', 'cliente'),
       vencido: [{val: 'SÍ', isPossible: getDataExcluding(['vencido']).some(i => i.vencido)}, {val: 'NO', isPossible: getDataExcluding(['vencido']).some(i => !i.vencido)}],
       retencion: [{val: 'SÍ', isPossible: getDataExcluding(['retencion']).some(i => i.retencion)}, {val: 'NO', isPossible: getDataExcluding(['retencion']).some(i => !i.retencion)}],
@@ -155,8 +155,8 @@ export const Sidebar = ({ data }: { data: ProcessedDebtRecord[] }) => {
   const filterRows: { key: FilterKey; label: string }[] = [
     { key: 'empresa', label: 'EMPRESA' },
     { key: 'anyo', label: 'EJERCICIO' },
-    { key: 'mes', label: 'MES VECTO.' },
-    { key: 'mes_doc', label: 'MES DOC.' },
+    { key: 'mes_label', label: 'MES VECTO.' },
+    { key: 'mes_doc_label', label: 'MES DOC.' },
     { key: 'entidad', label: 'ENTIDAD' },
     { key: 'forma_pago', label: 'FORMA PAGO' },
     { key: 'gestion', label: 'EN GESTIÓN' },

@@ -2,7 +2,7 @@ import { ProcessedDebtRecord } from '../utils/dataProcessor';
 import { useDashboardStore } from '../store/useDashboardStore';
 
 export const DebtTable = ({ data }: { data: ProcessedDebtRecord[] }) => {
-  const dark = useDashboardStore(state => state.isDarkMode);
+  const { isDarkMode: dark, toggleFilter } = useDashboardStore();
 
   // Helper function to format currency
   const formatCur = (val: number) => val.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
@@ -12,7 +12,7 @@ export const DebtTable = ({ data }: { data: ProcessedDebtRecord[] }) => {
       <table className="w-full text-left border-collapse whitespace-nowrap">
         <thead className={`sticky top-0 z-10 ${dark ? 'bg-slate-900 border-slate-700 shadow-xl text-slate-400' : 'bg-white border-slate-200 shadow-sm text-slate-500'} border-b`}>
           <tr>
-            <th className="px-2 py-2 text-[9px] font-bold uppercase tracking-wider text-center">ID</th>
+            <th className="px-3 py-2 text-[9px] font-bold uppercase tracking-wider text-center">Empresa</th>
             <th className="px-2 py-2 text-[9px] font-bold uppercase tracking-wider">Cod</th>
             <th className="px-3 py-2 text-[9px] font-bold uppercase tracking-wider">Cliente</th>
             <th className="px-2 py-2 text-[9px] font-bold uppercase tracking-wider">Factura</th>
@@ -32,38 +32,45 @@ export const DebtTable = ({ data }: { data: ProcessedDebtRecord[] }) => {
           {data.map((item, idx) => (
             <tr key={idx} className={`group transition-all duration-150 ${dark ? 'hover:bg-blue-900/20' : 'hover:bg-blue-50/50'}`}>
               
-              {/* ID Empresa */}
-              <td className="px-2 py-1.5 text-center">
-                <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded ${dark ? 'bg-slate-800 text-slate-300' : 'bg-slate-100 text-slate-500'}`}>{item.idempresa}</span>
+              {/* ID Empresa (Now Empresa Name mapping) */}
+              <td 
+                className={`px-3 py-1.5 text-center cursor-pointer hover:font-black transition-all ${dark ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-900'}`}
+                onClick={() => toggleFilter('empresa', item.empresa)}
+              >
+                <span className={`text-[9px] font-extrabold px-2 py-1 rounded tracking-widest ${dark ? 'bg-slate-800' : 'bg-slate-200'}`}>{item.empresa}</span>
               </td>
               
               {/* Cod Cliente */}
-              <td className={`px-2 py-1.5 text-[9px] font-mono ${dark ? 'text-slate-400' : 'text-slate-500'}`}>
+              <td 
+                className={`px-2 py-1.5 text-[9px] font-mono cursor-pointer hover:font-bold ${dark ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900'}`}
+                onClick={() => toggleFilter('cod_cliente', item.cod_cliente)}
+              >
                 {item.cod_cliente}
               </td>
               
               {/* Cliente */}
               <td className="px-3 py-1.5">
                 <div 
-                  className={`text-[10px] font-bold uppercase tracking-tight truncate max-w-[180px] ${dark ? 'text-slate-200' : 'text-slate-800'}`}
+                  className={`text-[10px] font-bold uppercase tracking-tight truncate max-w-[180px] cursor-pointer hover:text-blue-500 transition-colors ${dark ? 'text-slate-200' : 'text-slate-800'}`}
                   title={item.nombre_comercial ? `Comercial: ${item.nombre_comercial}` : undefined}
+                  onClick={() => toggleFilter('cliente', item.cliente)}
                 >
                   {item.cliente}
                 </div>
               </td>
               
               {/* N Factura */}
-              <td className={`px-2 py-1.5 text-[10px] font-mono font-semibold ${dark ? 'text-indigo-400' : 'text-indigo-600'}`}>
+              <td className={`px-2 py-1.5 text-[10px] font-mono font-semibold cursor-pointer ${dark ? 'text-indigo-400 hover:text-indigo-200' : 'text-indigo-600 hover:text-indigo-800'}`}>
                 {item.nfactura ? item.nfactura.split(',').map((fac, i) => (
-                  <div key={i}>{fac.trim()}</div>
+                  <div key={i} onClick={() => toggleFilter('nfactura', fac.trim())}>{fac.trim()}</div>
                 )) : '-'}
               </td>
               
               {/* Fechas */}
-              <td className={`px-2 py-1.5 text-[9px] ${dark ? 'text-slate-400' : 'text-slate-500'}`}>
+              <td className={`px-2 py-1.5 text-[9px] cursor-pointer hover:underline ${dark ? 'text-slate-400' : 'text-slate-500'}`} onClick={() => { if(item.mes_doc_label) toggleFilter('mes_doc_label', item.mes_doc_label) }}>
                 {item.fdoc ? new Date(item.fdoc).toLocaleDateString('es-ES') : ''}
               </td>
-              <td className={`px-2 py-1.5 text-[9px] font-semibold ${item.dias_vencidos > 0 ? 'text-red-500' : (dark ? 'text-slate-300' : 'text-slate-700')}`}>
+              <td className={`px-2 py-1.5 text-[9px] font-semibold cursor-pointer hover:underline ${item.dias_vencidos > 0 ? 'text-red-500' : (dark ? 'text-slate-300' : 'text-slate-700')}`} onClick={() => toggleFilter('mes_label', item.mes_label)}>
                 {item.vencimiento.toLocaleDateString('es-ES')}
               </td>
               
@@ -79,17 +86,27 @@ export const DebtTable = ({ data }: { data: ProcessedDebtRecord[] }) => {
               </td>
               
               {/* Datos Pago */}
-              <td className={`px-3 py-1.5 text-[9px] font-semibold tracking-wider ${dark ? 'text-slate-300' : 'text-slate-600'}`}>
+              <td 
+                className={`px-3 py-1.5 text-[9px] font-semibold tracking-wider cursor-pointer hover:underline ${dark ? 'text-slate-300' : 'text-slate-600'}`}
+                onClick={() => toggleFilter('forma_pago', item.forma_pago)}
+              >
                 {item.forma_pago}
               </td>
               <td className={`px-2 py-1.5 text-[9px] truncate max-w-[100px] ${dark ? 'text-slate-400' : 'text-slate-500'}`} title={item.condicion_pago || ''}>
                 {item.condicion_pago || '-'}
               </td>
-              <td className={`px-3 py-1.5 text-[9px] font-bold ${dark ? 'text-teal-400' : 'text-teal-700'}`}>
+              <td 
+                className={`px-3 py-1.5 text-[9px] font-bold cursor-pointer hover:font-black ${dark ? 'text-teal-400' : 'text-teal-700'}`}
+                onClick={() => toggleFilter('entidad', item.entidad)}
+              >
                 {item.entidad}
               </td>
               
-              <td className={`px-2 py-1.5 text-[9px] truncate max-w-[100px] ${dark ? 'text-slate-400' : 'text-slate-500'}`} title={item.contrato || ''}>
+              <td 
+                 className={`px-2 py-1.5 text-[9px] truncate max-w-[100px] cursor-pointer hover:font-bold ${dark ? 'text-slate-400' : 'text-slate-500'}`} 
+                 title={item.contrato || ''}
+                 onClick={() => { if(item.contrato) toggleFilter('contrato', item.contrato.split(',')[0].trim().toUpperCase()) }}
+              >
                 {item.contrato || '-'}
               </td>
               
@@ -98,19 +115,27 @@ export const DebtTable = ({ data }: { data: ProcessedDebtRecord[] }) => {
                 <div className="flex flex-wrap gap-1.5 items-center max-w-[250px] overflow-hidden">
                   {item.gestion && (
                     <span 
-                      className={`cursor-help px-1.5 py-0.5 rounded-[4px] text-[8px] font-bold uppercase tracking-widest border ${dark ? 'bg-orange-950/60 text-orange-400 border-orange-900/50' : 'bg-orange-50 text-orange-600 border-orange-200'}`}
+                      onClick={() => toggleFilter('gestion', 'SÍ')}
+                      className={`cursor-pointer px-1.5 py-0.5 rounded-[4px] text-[8px] font-bold uppercase tracking-widest border hover:brightness-125 ${dark ? 'bg-orange-950/60 text-orange-400 border-orange-900/50' : 'bg-orange-50 text-orange-600 border-orange-200'}`}
                       title={item.comentario || 'Asunto en gestión (sin comentarios adjuntos)'}
                     >
                       • EN GESTIÓN
                     </span>
                   )}
                   {item.retencion && (
-                    <span className={`px-1.5 py-0.5 rounded-[4px] text-[8px] font-bold uppercase tracking-widest border ${dark ? 'bg-indigo-950/60 text-indigo-400 border-indigo-900/50' : 'bg-indigo-50 text-indigo-600 border-indigo-200'}`}>
+                    <span 
+                      onClick={() => toggleFilter('retencion', 'SÍ')}
+                      className={`cursor-pointer px-1.5 py-0.5 rounded-[4px] text-[8px] font-bold uppercase tracking-widest border hover:brightness-125 ${dark ? 'bg-indigo-950/60 text-indigo-400 border-indigo-900/50' : 'bg-indigo-50 text-indigo-600 border-indigo-200'}`}
+                    >
                       • RETENCIÓN
                     </span>
                   )}
                   {item.tag_list.slice(0, 2).map((tag, i) => (
-                    <span key={i} className={`px-1.5 py-0.5 rounded-[4px] text-[8px] font-bold uppercase tracking-widest border ${dark ? 'bg-slate-800 text-slate-400 border-slate-700' : 'bg-slate-100 text-slate-500 border-slate-200'}`}>
+                    <span 
+                      key={i} 
+                      onClick={() => toggleFilter('etiquetas', tag)}
+                      className={`cursor-pointer px-1.5 py-0.5 rounded-[4px] text-[8px] font-bold uppercase tracking-widest border hover:brightness-150 ${dark ? 'bg-slate-800 text-slate-400 border-slate-700' : 'bg-slate-100 text-slate-500 border-slate-200'}`}
+                    >
                       {tag}
                     </span>
                   ))}

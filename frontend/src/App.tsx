@@ -59,6 +59,8 @@ export default function App() {
         if (key === 'contrato' && !(item.contrato && item.contrato.split(',').some(c => selected.includes(c.trim().toUpperCase())))) return false;
         if (key === 'nfactura' && !selected.includes(item.nfactura)) return false;
         if (key === 'cod_cliente' && !selected.includes(item.cod_cliente)) return false;
+        if (key === 'mes_label' && !selected.includes(item.mes_label)) return false;
+        if (key === 'mes_doc_label' && (item.mes_doc_label === null || !selected.includes(item.mes_doc_label))) return false;
       }
       return true;
     });
@@ -138,12 +140,6 @@ export default function App() {
         </div>
 
         <div className={`rounded-[1.5rem] border transition-all duration-500 mb-12 overflow-hidden ml-4 mr-10 ${dark ? 'bg-slate-900/40 border-slate-800 shadow-2xl' : 'bg-white border-slate-200 shadow-xl'}`}>
-          <div className="px-10 py-6 border-b flex justify-between items-center bg-opacity-10 backdrop-blur-md">
-             <h3 className={`text-[12px] font-bold uppercase tracking-[0.5em] ${dark ? 'text-slate-500' : 'text-slate-500'}`}>DETALLE DE CARTERA ACTIVA</h3>
-             <span className={`px-4 py-1.5 rounded-xl text-[10px] font-bold tracking-widest ${dark ? 'bg-blue-950/40 text-blue-400 border border-blue-900/50' : 'bg-blue-50 text-blue-700 border border-blue-100'}`}>
-               EXPLORER MODE
-             </span>
-          </div>
           <DebtTable data={filteredData} />
         </div>
       </main>

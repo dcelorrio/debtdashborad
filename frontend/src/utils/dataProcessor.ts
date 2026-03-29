@@ -1,4 +1,10 @@
 // Processing logic for Debt Dashboard
+
+const MONTH_ABBR = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+export const formatMonthLabel = (month: number, year: number): string => {
+  return `${MONTH_ABBR[month - 1]} ${String(year).slice(-2)}`;
+};
+
 export interface ProcessedDebtRecord {
   cliente: string;
   cod_cliente: string;
@@ -6,6 +12,7 @@ export interface ProcessedDebtRecord {
   fvencimiento: string;
   fdoc: string | null;
   mes_doc: number | null;
+  mes_doc_label: string | null;
   importe: number;
   cobrado: number;
   pendiente: number;
@@ -20,6 +27,7 @@ export interface ProcessedDebtRecord {
   cargo_abono: string;
   anyo: number;
   mes: number;
+  mes_label: string;
   entidad: string;
   idempresa: number;
   empresa: string;
@@ -72,6 +80,8 @@ export const processRecord = (record: any): ProcessedDebtRecord => {
     vencimiento: fv,
     anyo: fv.getFullYear(),
     mes: fv.getMonth() + 1,
+    mes_label: formatMonthLabel(fv.getMonth() + 1, fv.getFullYear()),
+    mes_doc_label: fd ? formatMonthLabel(fd.getMonth() + 1, fd.getFullYear()) : null,
     entidad: record.entidad || 'SIN ENTIDAD',
     dias_vencidos: diffDays > 0 ? diffDays : 0,
     gestion: Boolean(record.gestion === 1 || record.gestion === true),
