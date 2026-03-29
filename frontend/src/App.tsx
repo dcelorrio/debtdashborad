@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { useDashboardStore, FilterKey } from './store/useDashboardStore';
+import { useDashboardStore } from './store/useDashboardStore';
 import { processRecord, ProcessedDebtRecord } from './utils/dataProcessor';
 import { Sidebar } from './components/Sidebar';
 import { TemporalDistChart, EntityPieChart, StatusComparisonChart, PaymentMethodPieChart } from './components/Charts';
@@ -8,7 +8,6 @@ import {
   FileText, 
   RefreshCw, 
   Filter as FilterIcon,
-  X,
   Moon,
   Sun,
   Coins,
@@ -20,7 +19,7 @@ export default function App() {
   const [data, setData] = useState<ProcessedDebtRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [temporalMode, setTemporalMode] = useState<'MES' | 'TRIMESTRE' | 'AÑO'>('MES');
-  const { filters, isDarkMode: dark, toggleFilter, toggleDarkMode, clearAll } = useDashboardStore();
+  const { filters, isDarkMode: dark, toggleDarkMode, clearAll } = useDashboardStore();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -117,19 +116,12 @@ export default function App() {
             />
           </div>
           
-          <div className="col-span-2 flex flex-col gap-4">
-            <div className={`w-full h-[240px] p-4 rounded-[2.5rem] border transition-all duration-500 ${dark ? 'bg-slate-900/40 border-slate-800' : 'bg-white border-slate-200 shadow-2xl'}`}>
+          <div className="col-span-2 row-span-2 flex flex-col gap-4">
+            <div className={`w-full h-[240px] p-4 rounded-[2.5rem] border transition-all duration-500 shrink-0 ${dark ? 'bg-slate-900/40 border-slate-800' : 'bg-white border-slate-200 shadow-2xl'}`}>
               <StatusComparisonChart data={data} filteredData={filteredData} />
             </div>
-            <div className="space-y-2 max-h-[220px] overflow-y-auto scrollbar-hide py-1">
-                {Object.values(filters).some(v => v.length > 0) && (
-                   <>
-                    <p className={`text-[10px] font-bold uppercase tracking-[0.4em] mb-2 text-center ${dark ? 'text-slate-600' : 'text-slate-300'}`}>FILTROS ACTIVOS</p>
-                    {(Object.entries(filters) as [FilterKey, (string|number)[]][]).map(([key, values]) => (
-                      values.length > 0 && <SelectionBadge key={key} label={`${key}: ${values.join(',')}`} dark={dark} onClear={() => values.forEach(v => toggleFilter(key, v))} />
-                    ))}
-                   </>
-                )}
+            <div className="flex-1">
+               <SummaryStatusTable filteredData={filteredData} dark={dark} />
             </div>
           </div>
 
@@ -138,12 +130,6 @@ export default function App() {
           </div>
           <div className={`col-span-3 p-6 rounded-[2.5rem] border transition-all duration-500 ${dark ? 'bg-slate-900/40 border-slate-800 shadow-2xl' : 'bg-white border-slate-200 shadow-xl'} h-[300px]`}>
              <EntityPieChart data={data} filteredData={filteredData} />
-          </div>
-          <div className="col-span-2 flex flex-col justify-center items-center">
-             <div className={`w-full h-full rounded-[2.5rem] border border-dashed flex flex-col items-center justify-center opacity-40 ${dark ? 'border-slate-800 text-slate-800' : 'border-slate-200 text-slate-200'}`}>
-                <Activity size={32} className="mb-3" />
-                <span className="text-[10px] font-bold uppercase tracking-[0.8em]">CONCATENATION VC4.4</span>
-             </div>
           </div>
         </div>
 
@@ -173,13 +159,64 @@ const KPICard = ({ title, value, dark, isAmount, icon }: any) => (
   </div>
 );
 
-function SelectionBadge({ label, onClear, dark }: any) {
+function SummaryStatusTable({ filteredData, dark }: { filteredData: ProcessedDebtRecord[], dark: boolean }) {
+  const summary = useMemo(() => {
+     const getEstado = (ent: string) => {
+        if (!ent || ent === 'NULL' || ent === 'SIN ENTIDAD') return 'NO';
+        if (ent === 'PAGADO') return 'PA';
+        if (ent === 'PROGRESO') return 'PR';
+        if (ent === 'INFORMADO') return 'IN';
+        if (ent.includes('RET.SOLICITADA') || ent.includes('RET. SOLICITADA')) return 'RET';
+        return 'SI';
+     };
+
+     const groups: Record<string, { empresa: string, estado: string, importe: number }> = {};
+     
+     filteredData.forEach(item => {
+         const st = getEstado(item.entidad || '');
+         const emp = (item.empresa && item.empresa !== 'SIN EMPRESA') ? item.empresa.split(' ')[0] : (item.cliente ? item.cliente.split(' ')[0] : 'DESCONOCIDA');
+         const key = `${emp}_${st}`;
+         if (!groups[key]) {
+            groups[key] = { empresa: emp, estado: st, importe: 0 };
+         }
+         groups[key].importe += item.pendiente;
+     });
+     
+     return Object.values(groups).sort((a,b) => b.importe - a.importe);
+  }, [filteredData]);
+
   return (
-    <div className={`flex items-center justify-between px-4 py-2.5 rounded-xl border text-[10.5px] font-bold uppercase tracking-widest transition-all ${
-      dark ? 'bg-blue-950/20 border-white/5 text-blue-400 shadow-xl' : 'bg-blue-50 border-blue-100 text-blue-700 shadow-sm'
-    }`}>
-      <span className="truncate max-w-[150px]">{label.replace('ANYO', 'EJERCICIO').replace('MES_DOC', 'MES DOC')}</span>
-      <button onClick={onClear} className="hover:text-red-500 transition-colors p-1"><X size={12} /></button>
-    </div>
+      <div className={`w-full h-full rounded-[2.5rem] border flex flex-col overflow-hidden transition-all duration-500 ${dark ? 'bg-slate-900/40 border-slate-800 shadow-2xl' : 'bg-white border-slate-200 shadow-xl'}`}>
+         <div className="px-6 py-4 border-b border-opacity-50">
+            <h3 className={`text-[12px] font-extrabold uppercase tracking-[0.3em] ${dark ? 'text-slate-400' : 'text-slate-500'}`}>RESUMEN ESTADOS</h3>
+         </div>
+         <div className="flex-1 overflow-y-auto scrollbar-hide p-2 bg-gradient-to-b from-transparent to-slate-500/5">
+            <table className="w-full text-left">
+               <thead className={`sticky top-0 backdrop-blur-md ${dark ? 'bg-slate-900/90 text-slate-500' : 'bg-white/90 text-slate-400'}`}>
+                  <tr>
+                    <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest rounded-tl-xl border-b border-transparent">EMPRESA</th>
+                    <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-center border-b border-transparent">ESTADO</th>
+                    <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-right rounded-tr-xl border-b border-transparent">IMPORTE</th>
+                  </tr>
+               </thead>
+               <tbody className={`divide-y ${dark ? 'divide-slate-800/50' : 'divide-slate-100'}`}>
+                  {summary.map((row, i) => {
+                     const isSi = row.estado === 'SI';
+                     const badgeColor = isSi ? (dark ? 'bg-emerald-950 text-emerald-400 ring-emerald-900/50' : 'bg-emerald-50 text-emerald-600 ring-emerald-100') : (dark ? 'bg-slate-800 text-blue-400 ring-slate-700' : 'bg-blue-50 text-blue-600 ring-blue-100');
+                     return (
+                     <tr key={i} className={`group ${dark ? 'hover:bg-slate-800/50' : 'hover:bg-slate-50'} transition-all`}>
+                        <td className={`px-4 py-3 text-[11px] font-semibold tracking-tight truncate max-w-[120px] ${dark ? 'text-slate-300' : 'text-slate-700'}`}>{row.empresa}</td>
+                        <td className="px-4 py-3 text-center">
+                           <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold shadow-sm ring-1 ${badgeColor}`}>{row.estado}</span>
+                        </td>
+                        <td className={`px-4 py-3 text-[12px] font-extrabold text-right ${dark ? 'text-slate-100' : 'text-slate-900'}`}>
+                           {(row.importe / 1000).toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}K
+                        </td>
+                     </tr>
+                  )})}
+               </tbody>
+            </table>
+         </div>
+      </div>
   );
 }
