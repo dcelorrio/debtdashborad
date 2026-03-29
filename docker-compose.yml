@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  # Backend FastAPI with Oracle connection
+  debt-dashboard-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: debt-dashboard-backend
+    ports:
+      - "8001:8001"
+    volumes:
+      # Mount the connections file from the sibling project CONTROLOTS
+      - ../CONTROLOTS/conexiones.json:/app/backend/conexiones.json:ro
+    environment:
+      - ORACLE_CONNECTIONS_PATH=/app/backend/conexiones.json
+    restart: always
+
+  # Frontend Nginx with built React app
+  debt-dashboard-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: debt-dashboard-frontend
+    ports:
+      - "3008:80"
+    depends_on:
+      - debt-dashboard-backend
+    restart: always

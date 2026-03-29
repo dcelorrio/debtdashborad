@@ -1,0 +1,7 @@
+oracledb
+fastapi
+pydantic
+uvicorn
+pandas
+plotly
+dash
