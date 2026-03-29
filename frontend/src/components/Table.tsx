@@ -54,7 +54,9 @@ export const DebtTable = ({ data }: { data: ProcessedDebtRecord[] }) => {
               
               {/* N Factura */}
               <td className={`px-2 py-1.5 text-[10px] font-mono font-semibold ${dark ? 'text-indigo-400' : 'text-indigo-600'}`}>
-                {item.nfactura}
+                {item.nfactura ? item.nfactura.split(',').map((fac, i) => (
+                  <div key={i}>{fac.trim()}</div>
+                )) : '-'}
               </td>
               
               {/* Fechas */}
@@ -63,7 +65,6 @@ export const DebtTable = ({ data }: { data: ProcessedDebtRecord[] }) => {
               </td>
               <td className={`px-2 py-1.5 text-[9px] font-semibold ${item.dias_vencidos > 0 ? 'text-red-500' : (dark ? 'text-slate-300' : 'text-slate-700')}`}>
                 {item.vencimiento.toLocaleDateString('es-ES')}
-                {item.dias_vencidos > 0 && <span className="ml-1 text-[8px] text-red-500">({item.dias_vencidos}d)</span>}
               </td>
               
               {/* Económicos */}
