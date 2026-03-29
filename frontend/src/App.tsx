@@ -116,11 +116,11 @@ export default function App() {
             />
           </div>
           
-          <div className="col-span-2 row-span-2 flex flex-col gap-4">
+          <div className="col-span-2 row-span-2 flex flex-col gap-4 min-h-0">
             <div className={`w-full h-[240px] p-4 rounded-[2.5rem] border transition-all duration-500 shrink-0 ${dark ? 'bg-slate-900/40 border-slate-800' : 'bg-white border-slate-200 shadow-2xl'}`}>
               <StatusComparisonChart data={data} filteredData={filteredData} />
             </div>
-            <div className="flex-1">
+            <div className="flex-1 min-h-0">
                <SummaryStatusTable filteredData={filteredData} dark={dark} />
             </div>
           </div>
@@ -194,24 +194,30 @@ function SummaryStatusTable({ filteredData, dark }: { filteredData: ProcessedDeb
      });
      
      return Object.values(groups).sort((a,b) => {
-         if (a.estado !== b.estado) return a.estado.localeCompare(b.estado);
+         if (a.estado !== b.estado) {
+             const order: Record<string, number> = { 'NO': 1, 'IN': 2, 'SI': 3, 'PA': 4, 'PR': 5, 'RET': 6 };
+             const valA = order[a.estado] || 99;
+             const valB = order[b.estado] || 99;
+             if (valA !== valB) return valA - valB;
+             return a.estado.localeCompare(b.estado);
+         }
          return b.importe - a.importe;
      });
   }, [filteredData]);
 
   return (
       <div className={`w-full h-full rounded-[2.5rem] border flex flex-col overflow-hidden transition-all duration-500 ${dark ? 'bg-slate-900/40 border-slate-800 shadow-2xl' : 'bg-white border-slate-200 shadow-xl'}`}>
-         <div className="px-6 py-4 border-b border-opacity-50">
+         <div className="px-6 py-3 border-b border-opacity-50">
             <h3 className={`text-[12px] font-extrabold uppercase tracking-[0.3em] ${dark ? 'text-slate-400' : 'text-slate-500'}`}>RESUMEN ESTADOS</h3>
          </div>
-         <div className="flex-1 overflow-y-auto scrollbar-hide p-2 bg-gradient-to-b from-transparent to-slate-500/5">
+         <div className="flex-1 overflow-y-auto scrollbar-hide p-1.5 bg-gradient-to-b from-transparent to-slate-500/5">
             <table className="w-full text-left">
                <thead className={`sticky top-0 backdrop-blur-md ${dark ? 'bg-slate-900/90 text-slate-500' : 'bg-white/90 text-slate-400'}`}>
                   <tr>
-                    <th className="px-3 py-2 text-[10px] font-bold uppercase tracking-widest rounded-tl-xl border-b border-transparent">EMPRESA</th>
-                    <th className="px-3 py-2 text-[10px] font-bold uppercase tracking-widest border-b border-transparent">CLIENTE</th>
-                    <th className="px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-center border-b border-transparent">ESTADO</th>
-                    <th className="px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-right rounded-tr-xl border-b border-transparent">IMPORTE</th>
+                    <th className="px-2 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-tl-xl border-b border-transparent">EMPRESA</th>
+                    <th className="px-2 py-1.5 text-[10px] font-bold uppercase tracking-widest border-b border-transparent">CLIENTE</th>
+                    <th className="px-2 py-1.5 text-[10px] font-bold uppercase tracking-widest text-center border-b border-transparent">ESTADO</th>
+                    <th className="px-2 py-1.5 text-[10px] font-bold uppercase tracking-widest text-right rounded-tr-xl border-b border-transparent">IMPORTE</th>
                   </tr>
                </thead>
                <tbody className={`divide-y ${dark ? 'divide-slate-800/50' : 'divide-slate-100'}`}>
@@ -220,12 +226,12 @@ function SummaryStatusTable({ filteredData, dark }: { filteredData: ProcessedDeb
                      const badgeColor = isSi ? (dark ? 'bg-emerald-950 text-emerald-400 ring-emerald-900/50' : 'bg-emerald-50 text-emerald-600 ring-emerald-100') : (dark ? 'bg-slate-800 text-blue-400 ring-slate-700' : 'bg-blue-50 text-blue-600 ring-blue-100');
                      return (
                      <tr key={i} className={`group ${dark ? 'hover:bg-slate-800/50' : 'hover:bg-slate-50'} transition-all`}>
-                        <td className={`px-3 py-1.5 text-[10px] font-bold tracking-tight truncate max-w-[60px] ${dark ? 'text-slate-400' : 'text-slate-500'}`} title={row.empresa}>{row.empresa}</td>
-                        <td className={`px-3 py-1.5 text-[11px] font-semibold tracking-tight truncate max-w-[120px] ${dark ? 'text-slate-200' : 'text-slate-700'}`} title={row.cliente}>{row.cliente}</td>
-                        <td className="px-3 py-1.5 text-center">
-                           <span className={`px-2 py-0.5 rounded text-[9px] font-extrabold shadow-sm ring-1 ${badgeColor}`}>{row.estado}</span>
+                        <td className={`px-2 py-1 text-[10px] font-bold tracking-tight truncate max-w-[60px] ${dark ? 'text-slate-400' : 'text-slate-500'}`} title={row.empresa}>{row.empresa}</td>
+                        <td className={`px-2 py-1 text-[11px] font-semibold tracking-tight truncate max-w-[120px] ${dark ? 'text-slate-200' : 'text-slate-700'}`} title={row.cliente}>{row.cliente}</td>
+                        <td className="px-2 py-1 text-center">
+                           <span className={`px-1.5 py-0.5 rounded text-[9px] font-extrabold shadow-sm ring-1 ${badgeColor}`}>{row.estado}</span>
                         </td>
-                        <td className={`px-3 py-1.5 text-[11px] font-extrabold text-right ${dark ? 'text-slate-100' : 'text-slate-900'}`}>
+                        <td className={`px-2 py-1 text-[11px] font-extrabold text-right ${dark ? 'text-slate-100' : 'text-slate-900'}`}>
                            {(row.importe / 1000).toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}K
                         </td>
                      </tr>
