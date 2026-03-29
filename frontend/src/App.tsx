@@ -125,11 +125,15 @@ export default function App() {
             </div>
           </div>
 
-          <div className={`col-span-3 p-6 rounded-[2.5rem] border transition-all duration-500 ${dark ? 'bg-slate-900/40 border-slate-800 shadow-2xl' : 'bg-white border-slate-200 shadow-xl'} h-[300px]`}>
+          <div className={`col-span-2 p-6 rounded-[2.5rem] border transition-all duration-500 ${dark ? 'bg-slate-900/40 border-slate-800 shadow-2xl' : 'bg-white border-slate-200 shadow-xl'} h-[300px]`}>
              <PaymentMethodPieChart data={data} filteredData={filteredData} />
           </div>
-          <div className={`col-span-3 p-6 rounded-[2.5rem] border transition-all duration-500 ${dark ? 'bg-slate-900/40 border-slate-800 shadow-2xl' : 'bg-white border-slate-200 shadow-xl'} h-[300px]`}>
+          <div className={`col-span-2 p-6 rounded-[2.5rem] border transition-all duration-500 ${dark ? 'bg-slate-900/40 border-slate-800 shadow-2xl' : 'bg-white border-slate-200 shadow-xl'} h-[300px]`}>
              <EntityPieChart data={data} filteredData={filteredData} />
+          </div>
+          {/* Empty Placeholder Card */}
+          <div className={`col-span-2 rounded-[2.5rem] border border-dashed transition-all duration-500 flex items-center justify-center p-6 bg-transparent h-[300px] ${dark ? 'border-slate-800/30 text-slate-700' : 'border-slate-300 text-slate-300'}`}>
+            <span className="text-[10px] uppercase font-bold tracking-[0.3em] opacity-50">Espacio Reservado</span>
           </div>
         </div>
 
