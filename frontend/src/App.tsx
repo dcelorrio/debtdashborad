@@ -77,7 +77,7 @@ export default function App() {
     <div className={`flex items-center justify-center h-screen ${dark ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
       <div className="flex flex-col items-center">
         <Activity className="animate-pulse text-blue-500 mb-4" size={56} />
-        <span className="font-black uppercase tracking-[0.8em] text-[13px] opacity-80 text-blue-500">SATYA REBOOT VC5.6 FINAL</span>
+        <span className="font-bold uppercase tracking-[0.8em] text-[13px] opacity-80 text-blue-500">SATYA REBOOT VC5.6 FINAL</span>
       </div>
     </div>
   );
@@ -97,7 +97,7 @@ export default function App() {
           <div className="flex items-center gap-3">
             <div className={`flex items-center gap-2.5 px-4 py-2 rounded-xl border ${dark ? 'bg-slate-900 border-slate-700 shadow-2xl' : 'bg-white border-slate-200 shadow-lg'}`}>
               <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-              <span className={`text-[12px] font-[1000] uppercase tracking-[0.3em] ${dark ? 'text-slate-300' : 'text-slate-800'}`}>SATYA ANALYTICS • 2026/2027</span>
+              <span className={`text-[12px] font-bold uppercase tracking-[0.3em] ${dark ? 'text-slate-300' : 'text-slate-800'}`}>SATYA ANALYTICS • 2026/2027</span>
             </div>
             <button onClick={() => toggleDarkMode()} className={`p-2.5 rounded-xl border transition-all ${dark ? 'bg-slate-900 border-slate-700 text-yellow-500 shadow-xl' : 'bg-white border-slate-200 text-slate-400 shadow-md hover:shadow-xl'}`}>
               {dark ? <Sun size={18} /> : <Moon size={18} />}
@@ -124,7 +124,7 @@ export default function App() {
             <div className="space-y-2 max-h-[220px] overflow-y-auto scrollbar-hide py-1">
                 {Object.values(filters).some(v => v.length > 0) && (
                    <>
-                    <p className={`text-[10px] font-black uppercase tracking-[0.4em] mb-2 text-center ${dark ? 'text-slate-600' : 'text-slate-300'}`}>FILTROS ACTIVOS</p>
+                    <p className={`text-[10px] font-bold uppercase tracking-[0.4em] mb-2 text-center ${dark ? 'text-slate-600' : 'text-slate-300'}`}>FILTROS ACTIVOS</p>
                     {(Object.entries(filters) as [FilterKey, (string|number)[]][]).map(([key, values]) => (
                       values.length > 0 && <SelectionBadge key={key} label={`${key}: ${values.join(',')}`} dark={dark} onClear={() => values.forEach(v => toggleFilter(key, v))} />
                     ))}
@@ -142,15 +142,15 @@ export default function App() {
           <div className="col-span-2 flex flex-col justify-center items-center">
              <div className={`w-full h-full rounded-[2.5rem] border border-dashed flex flex-col items-center justify-center opacity-40 ${dark ? 'border-slate-800 text-slate-800' : 'border-slate-200 text-slate-200'}`}>
                 <Activity size={32} className="mb-3" />
-                <span className="text-[10px] font-black uppercase tracking-[0.8em]">CONCATENATION VC4.4</span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.8em]">CONCATENATION VC4.4</span>
              </div>
           </div>
         </div>
 
         <div className={`rounded-[2.5rem] border transition-all duration-500 mb-12 overflow-hidden mx-10 ${dark ? 'bg-slate-900/40 border-slate-800 shadow-2xl' : 'bg-white border-slate-200 shadow-xl'}`}>
           <div className="px-10 py-6 border-b flex justify-between items-center bg-opacity-10 backdrop-blur-md">
-             <h3 className={`text-[12px] font-black uppercase tracking-[0.5em] ${dark ? 'text-slate-500' : 'text-slate-500'}`}>DETALLE DE CARTERA ACTIVA</h3>
-             <span className={`px-4 py-1.5 rounded-xl text-[10px] font-black tracking-widest ${dark ? 'bg-blue-950/40 text-blue-400 border border-blue-900/50' : 'bg-blue-50 text-blue-700 border border-blue-100'}`}>
+             <h3 className={`text-[12px] font-bold uppercase tracking-[0.5em] ${dark ? 'text-slate-500' : 'text-slate-500'}`}>DETALLE DE CARTERA ACTIVA</h3>
+             <span className={`px-4 py-1.5 rounded-xl text-[10px] font-bold tracking-widest ${dark ? 'bg-blue-950/40 text-blue-400 border border-blue-900/50' : 'bg-blue-50 text-blue-700 border border-blue-100'}`}>
                EXPLORER MODE
              </span>
           </div>
@@ -165,9 +165,9 @@ const KPICard = ({ title, value, dark, isAmount, icon }: any) => (
   <div className={`flex flex-col border-l-2 pl-3 py-0 transition-all ${dark ? 'border-slate-800' : 'border-slate-300'}`}>
     <div className="flex items-center gap-2 mb-0.5 opacity-60">
       {icon}
-      <span className={`text-[10px] font-black uppercase tracking-[0.3em] ${dark ? 'text-slate-400' : 'text-slate-600'}`}>{title}</span>
+      <span className={`text-[10px] font-bold uppercase tracking-[0.3em] ${dark ? 'text-slate-400' : 'text-slate-600'}`}>{title}</span>
     </div>
-    <span className={`text-[28px] font-[1000] tracking-tighter leading-none font-mono ${dark ? 'text-slate-100' : 'text-slate-800'}`}>
+    <span className={`text-[28px] font-extrabold tracking-tighter leading-none font-mono ${dark ? 'text-slate-100' : 'text-slate-800'}`}>
       {isAmount ? `${(value / 1000000).toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}M` : value.toLocaleString('es-ES')}
     </span>
   </div>
@@ -175,7 +175,7 @@ const KPICard = ({ title, value, dark, isAmount, icon }: any) => (
 
 function SelectionBadge({ label, onClear, dark }: any) {
   return (
-    <div className={`flex items-center justify-between px-4 py-2.5 rounded-xl border text-[10.5px] font-black uppercase tracking-widest transition-all ${
+    <div className={`flex items-center justify-between px-4 py-2.5 rounded-xl border text-[10.5px] font-bold uppercase tracking-widest transition-all ${
       dark ? 'bg-blue-950/20 border-white/5 text-blue-400 shadow-xl' : 'bg-blue-50 border-blue-100 text-blue-700 shadow-sm'
     }`}>
       <span className="truncate max-w-[150px]">{label.replace('ANYO', 'EJERCICIO').replace('MES_DOC', 'MES DOC')}</span>

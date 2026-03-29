@@ -31,12 +31,12 @@ const FilterList = ({ label, options, selectedValues, onToggle, onClear, dark }:
            <div className={`transition-transform duration-300 ${isOpen ? 'rotate-90' : ''}`}>
               <ChevronRight size={13} className={isActive ? 'text-emerald-500 shadow-[0_0_8px_#10b981]' : 'text-slate-600'} />
            </div>
-           <span className={`text-[12px] font-black uppercase tracking-[0.15em] ${
+           <span className={`text-[12px] font-bold uppercase tracking-[0.15em] ${
              isActive ? 'text-emerald-500' : dark ? 'text-slate-300' : 'text-slate-800'
            }`}>
              {label.toUpperCase()}
              {isActive && (
-               <span className="ml-3 px-1.5 py-0.5 rounded-md bg-emerald-500 text-white text-[8.5px] font-black">
+               <span className="ml-3 px-1.5 py-0.5 rounded-md bg-emerald-500 text-white text-[8.5px] font-bold">
                  {selectedValues.length}
                </span>
              )}
@@ -61,7 +61,7 @@ const FilterList = ({ label, options, selectedValues, onToggle, onClear, dark }:
                 <div 
                   key={String(opt.val)}
                   onClick={() => onToggle(opt.val)}
-                  className={`px-4 py-1.5 rounded-xl cursor-pointer text-[11px] font-black flex items-center gap-3 transition-all ${
+                  className={`px-4 py-1.5 rounded-xl cursor-pointer text-[11px] font-semibold flex items-center gap-3 transition-all ${
                     selected 
                       ? 'bg-emerald-500/15 text-emerald-400 shadow-[inset_0_0_15px_#10b98115] ring-1 ring-emerald-500/20' 
                       : (dark ? 'text-slate-200 hover:bg-slate-900/50' : 'text-slate-950 hover:bg-slate-200')
@@ -174,15 +174,15 @@ export const Sidebar = ({ data }: { data: ProcessedDebtRecord[] }) => {
             <Database size={22} className="text-white" />
           </div>
           <div>
-            <h1 className="text-[18px] font-[1000] tracking-tighter text-blue-500 leading-none">SATYA</h1>
-            <p className={`text-[10px] font-black uppercase tracking-[0.3em] ${dark ? 'text-slate-400' : 'text-slate-500'}`}>INTELLIGENCE</p>
+            <h1 className="text-[18px] font-extrabold tracking-tighter text-blue-500 leading-none">SATYA</h1>
+            <p className={`text-[10px] font-bold uppercase tracking-[0.3em] ${dark ? 'text-slate-400' : 'text-slate-500'}`}>INTELLIGENCE</p>
           </div>
       </div>
 
       <div className="flex-1 overflow-y-auto px-0 py-4 scrollbar-hide">
         <div className="flex items-center gap-3 mb-6 px-8">
           <Filter size={15} className="text-blue-500" />
-          <span className={`text-[11px] font-black uppercase tracking-[0.5em] ${dark ? 'text-slate-700' : 'text-slate-400'}`}>DIMENSIONES</span>
+          <span className={`text-[11px] font-bold uppercase tracking-[0.5em] ${dark ? 'text-slate-700' : 'text-slate-400'}`}>DIMENSIONES</span>
         </div>
 
         {filterRows.map(row => (
@@ -201,7 +201,7 @@ export const Sidebar = ({ data }: { data: ProcessedDebtRecord[] }) => {
       <div className={`p-6 border-t ${dark ? 'border-white/[0.05]' : 'border-slate-100'}`}>
         <button
           onClick={clearAll}
-          className={`w-full py-3.5 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 transition-all ${
+          className={`w-full py-3.5 rounded-2xl font-bold text-[11px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 transition-all ${
             dark 
               ? 'bg-red-950/20 text-red-500 border border-red-900/50 hover:bg-red-600 hover:text-white shadow-lg' 
               : 'bg-red-50 text-red-700 border border-red-100 hover:bg-red-600 hover:text-white shadow-md'
