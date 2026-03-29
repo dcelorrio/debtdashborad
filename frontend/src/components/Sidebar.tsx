@@ -164,7 +164,18 @@ export const Sidebar = ({ data }: { data: ProcessedDebtRecord[] }) => {
       empresa: getOptionsForDimension('empresa', 'empresa'),
       abono: [{val: 'SÍ', isPossible: getDataExcluding(['abono']).some(i => i.abono === 'SÍ')}, {val: 'NO', isPossible: getDataExcluding(['abono']).some(i => i.abono === 'NO')}],
       contrato: [], // Simplified for now to fix build
-      etiquetas: []
+      etiquetas: (() => {
+        const allTags = new Set<string>();
+        data.forEach(item => item.tag_list.forEach(t => allTags.add(t.toUpperCase())));
+        
+        const possibleTags = new Set<string>();
+        getDataExcluding(['etiquetas']).forEach(item => item.tag_list.forEach(t => possibleTags.add(t.toUpperCase())));
+
+        return Array.from(allTags).sort().map(val => ({
+          val,
+          isPossible: possibleTags.has(val)
+        }));
+      })()
     };
   }, [data, filters]);
 
@@ -173,6 +184,7 @@ export const Sidebar = ({ data }: { data: ProcessedDebtRecord[] }) => {
     { key: 'anyo', label: 'EJERCICIO' },
     { key: 'mes_label', label: 'MES VECTO.' },
     { key: 'mes_doc_label', label: 'MES DOC.' },
+    { key: 'etiquetas', label: 'ETIQUETAS' },
     { key: 'entidad', label: 'ENTIDAD' },
     { key: 'forma_pago', label: 'FORMA PAGO' },
     { key: 'gestion', label: 'EN GESTIÓN' },
