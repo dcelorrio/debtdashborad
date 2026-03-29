@@ -1,6 +1,6 @@
 // Processing logic for Debt Dashboard
 
-const MONTH_ABBR = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+const MONTH_ABBR = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
 export const formatMonthLabel = (month: number, year: number): string => {
   return `${MONTH_ABBR[month - 1]} ${String(year).slice(-2)}`;
 };
