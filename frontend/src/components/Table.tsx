@@ -6,6 +6,9 @@ import { ChevronUp, ChevronDown } from 'lucide-react';
 type SortKey = 'empresa' | 'cod_cliente' | 'cliente' | 'nfactura' | 'fdoc' | 'vencimiento' | 'importe' | 'cobrado' | 'pendiente' | 'forma_pago' | 'condicion_pago' | 'entidad' | 'contrato';
 type SortDir = 'asc' | 'desc';
 
+import * as XLSX from 'xlsx';
+import { Download } from 'lucide-react';
+
 export const DebtTable = ({ data }: { data: ProcessedDebtRecord[] }) => {
   const { isDarkMode: dark, toggleFilter } = useDashboardStore();
   const [sortKey, setSortKey] = useState<SortKey | null>(null);
@@ -43,6 +46,29 @@ export const DebtTable = ({ data }: { data: ProcessedDebtRecord[] }) => {
     });
   }, [data, sortKey, sortDir]);
 
+  const exportToExcel = () => {
+    const ws = XLSX.utils.json_to_sheet(sortedData.map(item => ({
+      Empresa: item.empresa,
+      "Cód. Cliente": item.cod_cliente,
+      Cliente: item.cliente,
+      "Factura(s)": item.nfactura,
+      "F. Doc": item.fdoc ? new Date(item.fdoc).toLocaleDateString('es-ES') : '',
+      "F. Vto": item.vencimiento.toLocaleDateString('es-ES'),
+      Importe: item.importe,
+      Cobrado: item.cobrado,
+      Pendiente: item.pendiente,
+      "Forma Pago": item.forma_pago,
+      "Condición Pago": item.condicion_pago,
+      Entidad: item.entidad,
+      Contrato: item.contrato,
+      Comentario: item.comentario,
+      Etiquetas: item.tag_list.join(', ')
+    })));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Cartera Activa");
+    XLSX.writeFile(wb, "Detalle_Cartera_Activa.xlsx");
+  };
+
   const formatCur = (val: number) => val.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
 
   // Sortable header component
@@ -53,7 +79,7 @@ export const DebtTable = ({ data }: { data: ProcessedDebtRecord[] }) => {
         className={`px-2 py-1.5 text-[9px] font-bold uppercase tracking-wider cursor-pointer select-none group ${className}`}
         onClick={() => handleSort(colKey)}
       >
-        <div className="flex items-center gap-0.5">
+        <div className="flex items-center gap-0.5 relative">
           <span>{label}</span>
           <div className="flex flex-col -space-y-1 ml-0.5 opacity-40 group-hover:opacity-100 transition-opacity">
             <ChevronUp size={8} className={active && sortDir === 'asc' ? 'text-blue-400 opacity-100' : ''} />
@@ -65,7 +91,14 @@ export const DebtTable = ({ data }: { data: ProcessedDebtRecord[] }) => {
   };
 
   return (
-    <div className="overflow-x-auto overflow-y-auto max-h-[800px] scrollbar-hide">
+    <div className="relative overflow-x-auto overflow-y-auto max-h-[800px] scrollbar-hide">
+      <button 
+        onClick={exportToExcel}
+        className={`absolute top-1.5 right-4 z-20 p-1.5 rounded-lg border transition-all ${dark ? 'bg-slate-800 border-slate-700 text-emerald-400 hover:bg-emerald-900/40 hover:text-emerald-300 shadow-lg' : 'bg-white border-slate-200 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 shadow-sm'}`}
+        title="Exportar a Excel"
+      >
+        <Download size={14} />
+      </button>
       <table className="w-full text-left border-collapse whitespace-nowrap">
         <thead className={`sticky top-0 z-10 ${dark ? 'bg-slate-900 border-slate-700 shadow-xl text-slate-400' : 'bg-white border-slate-200 shadow-sm text-slate-500'} border-b`}>
           <tr>
@@ -169,15 +202,20 @@ export const DebtTable = ({ data }: { data: ProcessedDebtRecord[] }) => {
               
               {/* Etiquetas y Alertas */}
               <td className="px-3 py-0.5">
-                <div className="flex flex-wrap gap-1 items-center max-w-[250px] overflow-hidden">
+                <div className="flex flex-wrap gap-1 items-center max-w-[250px] overflow-visible">
                   {item.gestion && (
-                    <span 
-                      onClick={() => toggleFilter('gestion', 'SÍ')}
-                      className={`cursor-pointer px-1 py-0 rounded-[3px] text-[7px] font-bold uppercase tracking-widest border hover:brightness-125 ${dark ? 'bg-orange-950/60 text-orange-400 border-orange-900/50' : 'bg-orange-50 text-orange-600 border-orange-200'}`}
-                      title={item.comentario || 'Asunto en gestión (sin comentarios adjuntos)'}
-                    >
-                      GESTIÓN
-                    </span>
+                    <div className="relative group/tooltip flex items-center">
+                      <span 
+                        onClick={() => toggleFilter('gestion', 'SÍ')}
+                        className={`cursor-pointer px-1 py-0 rounded-[3px] text-[7px] font-bold uppercase tracking-widest border hover:brightness-125 ${dark ? 'bg-orange-950/60 text-orange-400 border-orange-900/50' : 'bg-orange-50 text-orange-600 border-orange-200'}`}
+                        title={item.comentario || 'Asunto en gestión (sin comentarios adjuntos)'}
+                      >
+                        GESTIÓN
+                      </span>
+                      <div className="absolute hidden group-hover/tooltip:block z-50 bottom-full mb-1 left-1/2 -translate-x-1/2 w-64 p-2 text-[10px] sm:text-xs font-normal whitespace-pre-wrap rounded-lg shadow-xl shadow-black/50 border pointer-events-none break-words bg-slate-800 text-slate-200 border-slate-600">
+                        {item.comentario || 'Asunto en gestión (sin comentarios adjuntos)'}
+                      </div>
+                    </div>
                   )}
                   {item.retencion && (
                     <span 

@@ -13,6 +13,8 @@ interface DashboardStore {
   toggleFilter: (key: FilterKey, value: string | number) => void;
   setFilter: (key: FilterKey, values: (string | number)[]) => void;
   clearFilter: (key: FilterKey) => void;
+  invertFilter: (key: FilterKey, allPossibleValues: (string | number)[]) => void;
+  invertAllActiveFilters: (dataMap: Record<FilterKey, (string | number)[]>) => void;
   toggleDarkMode: () => void;
   clearAll: () => void;
   
@@ -48,6 +50,25 @@ export const useDashboardStore = create<DashboardStore>((set) => ({
   clearFilter: (key) => set((state) => ({
     filters: { ...state.filters, [key]: [] }
   })),
+
+  invertFilter: (key, allPossibleValues) => set((state) => {
+    const current = state.filters[key];
+    if (current.length === 0) return state; // Only invert active filters
+    const inverted = allPossibleValues.filter(val => !current.includes(val));
+    return { filters: { ...state.filters, [key]: inverted } };
+  }),
+
+  invertAllActiveFilters: (dataMap) => set((state) => {
+    const nextFilters = { ...state.filters };
+    let changed = false;
+    for (const key of Object.keys(state.filters) as FilterKey[]) {
+      if (state.filters[key].length > 0 && dataMap[key]) {
+        nextFilters[key] = dataMap[key].filter(val => !state.filters[key].includes(val));
+        changed = true;
+      }
+    }
+    return changed ? { filters: nextFilters } : state;
+  }),
 
   toggleDarkMode: () => set((state) => ({ isDarkMode: !state.isDarkMode })),
   

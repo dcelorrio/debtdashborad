@@ -13,8 +13,11 @@ import {
   Sun,
   Coins,
   History,
-  Activity
+  Activity,
+  Download
 } from 'lucide-react';
+
+import * as XLSX from 'xlsx';
 
 export default function App() {
   const [data, setData] = useState<ProcessedDebtRecord[]>([]);
@@ -159,7 +162,7 @@ const KPICard = ({ title, value, dark, isAmount, icon }: any) => (
   </div>
 );
 
-function SummaryStatusTable({ filteredData, dark }: { filteredData: ProcessedDebtRecord[], dark: boolean }) {
+export function SummaryStatusTable({ filteredData, dark }: { filteredData: ProcessedDebtRecord[], dark: boolean }) {
   const { toggleFilter, setFilter, filters } = useDashboardStore();
 
   const summary = useMemo(() => {
@@ -199,8 +202,28 @@ function SummaryStatusTable({ filteredData, dark }: { filteredData: ProcessedDeb
      });
   }, [filteredData]);
 
+  const exportToExcel = () => {
+    const ws = XLSX.utils.json_to_sheet(summary.map(item => ({
+      Empresa: item.empresa,
+      Cliente: item.cliente,
+      Estado: item.estado,
+      Importe: item.importe,
+      Entidades: Array.from(item.rawEntidades).join(', ')
+    })));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Resumen Estados");
+    XLSX.writeFile(wb, "Resumen_Estados_Deuda.xlsx");
+  };
+
   return (
-      <div className={`w-full h-full rounded-none border flex flex-col overflow-hidden transition-all duration-500 ${dark ? 'bg-slate-900/40 border-slate-800 shadow-2xl' : 'bg-white border-slate-200 shadow-xl'}`}>
+      <div className={`w-full h-full relative rounded-none border flex flex-col overflow-hidden transition-all duration-500 ${dark ? 'bg-slate-900/40 border-slate-800 shadow-2xl' : 'bg-white border-slate-200 shadow-xl'}`}>
+         <button 
+           onClick={exportToExcel}
+           className={`absolute top-2 right-2 z-20 p-1.5 rounded-lg border transition-all ${dark ? 'bg-slate-800 border-slate-700 text-emerald-400 hover:bg-emerald-900/40 hover:text-emerald-300 shadow-lg' : 'bg-white border-slate-200 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 shadow-sm'}`}
+           title="Exportar a Excel"
+         >
+           <Download size={14} />
+         </button>
          <div className="flex-1 overflow-y-auto scrollbar-hide p-1 bg-gradient-to-b from-transparent to-slate-500/5">
             <table className="w-full text-left">
                <thead className={`sticky top-0 backdrop-blur-md z-10 ${dark ? 'bg-slate-900/90 text-slate-500' : 'bg-white/90 text-slate-400'}`}>
@@ -208,7 +231,7 @@ function SummaryStatusTable({ filteredData, dark }: { filteredData: ProcessedDeb
                     <th className="px-2 py-1 text-[10px] font-bold uppercase tracking-widest border-b border-transparent">EMPRESA</th>
                     <th className="px-2 py-1 text-[10px] font-bold uppercase tracking-widest border-b border-transparent">CLIENTE</th>
                     <th className="px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-center border-b border-transparent">ESTADO</th>
-                    <th className="px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-right border-b border-transparent">IMPORTE</th>
+                    <th className="px-2 py-1 pr-8 text-[10px] font-bold uppercase tracking-widest text-right border-b border-transparent">IMPORTE</th>
                   </tr>
                </thead>
                <tbody className={`divide-y ${dark ? 'divide-slate-800/50' : 'divide-slate-100'}`}>

@@ -5,7 +5,8 @@ import {
   Filter, 
   Trash2, 
   Database, 
-  ChevronRight
+  ChevronRight,
+  ArrowRightLeft
 } from 'lucide-react';
 
 interface FilterListProps {
@@ -14,10 +15,11 @@ interface FilterListProps {
   selectedValues: (string | number)[];
   onToggle: (val: string | number) => void;
   onClear: () => void;
+  onInvert?: () => void;
   dark: boolean;
 }
 
-const FilterList = ({ label, options, selectedValues, onToggle, onClear, dark }: FilterListProps) => {
+const FilterList = ({ label, options, selectedValues, onToggle, onClear, onInvert, dark }: FilterListProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const isActive = selectedValues.length > 0;
   
@@ -43,12 +45,24 @@ const FilterList = ({ label, options, selectedValues, onToggle, onClear, dark }:
            </span>
         </div>
         {isActive && (
-           <button 
-             onClick={(e) => { e.stopPropagation(); onClear(); }}
-             className="text-slate-600 hover:text-red-500 transition-colors p-1"
-           >
-             <Trash2 size={13} />
-           </button>
+           <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+             {onInvert && (
+               <button 
+                 onClick={onInvert}
+                 className="text-slate-600 hover:text-blue-500 transition-colors p-1"
+                 title="Invertir selección"
+               >
+                 <ArrowRightLeft size={13} />
+               </button>
+             )}
+             <button 
+               onClick={onClear}
+               className="text-slate-600 hover:text-red-500 transition-colors p-1"
+               title="Borrar filtro"
+             >
+               <Trash2 size={13} />
+             </button>
+           </div>
         )}
       </div>
 
@@ -82,7 +96,7 @@ const FilterList = ({ label, options, selectedValues, onToggle, onClear, dark }:
 };
 
 export const Sidebar = ({ data }: { data: ProcessedDebtRecord[] }) => {
-  const { filters, toggleFilter, clearFilter, clearAll, isDarkMode: dark } = useDashboardStore();
+  const { filters, toggleFilter, clearFilter, clearAll, invertFilter, invertAllActiveFilters, isDarkMode: dark } = useDashboardStore();
 
   const options = useMemo(() => {
     const getDataExcluding = (excludeKeys: FilterKey[]) => {
@@ -175,39 +189,60 @@ export const Sidebar = ({ data }: { data: ProcessedDebtRecord[] }) => {
           </div>
           <div>
             <h1 className="text-[18px] font-extrabold tracking-tighter text-blue-500 leading-none">SATYA</h1>
-            <p className={`text-[10px] font-bold uppercase tracking-[0.3em] ${dark ? 'text-slate-400' : 'text-slate-500'}`}>INTELLIGENCE</p>
+            <p className={`text-[10px] font-bold uppercase tracking-[0.3em] ${dark ? 'text-slate-400' : 'text-slate-500'}`}>GESTION DEUDA</p>
           </div>
       </div>
 
       <div className="flex-1 overflow-y-auto px-0 py-4 scrollbar-hide">
         <div className="flex items-center gap-3 mb-6 px-8">
           <Filter size={15} className="text-blue-500" />
-          <span className={`text-[11px] font-bold uppercase tracking-[0.5em] ${dark ? 'text-slate-700' : 'text-slate-400'}`}>DIMENSIONES</span>
+          <span className={`text-[11px] font-bold uppercase tracking-[0.5em] ${dark ? 'text-slate-700' : 'text-slate-400'}`}>FILTROS</span>
         </div>
 
-        {filterRows.map(row => (
-          <FilterList
-            key={row.key}
-            label={row.label}
-            options={(options as any)[row.key]}
-            selectedValues={filters[row.key]}
-            onToggle={(val) => toggleFilter(row.key, val)}
-            onClear={() => clearFilter(row.key)}
-            dark={dark}
-          />
-        ))}
+        {filterRows.map(row => {
+          const rowOptions = (options as any)[row.key] || [];
+          return (
+            <FilterList
+              key={row.key}
+              label={row.label}
+              options={rowOptions}
+              selectedValues={filters[row.key]}
+              onToggle={(val) => toggleFilter(row.key, val)}
+              onClear={() => clearFilter(row.key)}
+              onInvert={() => invertFilter(row.key, rowOptions.map((o: any) => o.val))}
+              dark={dark}
+            />
+          );
+        })}
       </div>
 
-      <div className={`p-6 border-t ${dark ? 'border-white/[0.05]' : 'border-slate-100'}`}>
+      <div className={`p-4 border-t flex flex-col gap-2 ${dark ? 'border-white/[0.05]' : 'border-slate-100'}`}>
+        <button
+          onClick={() => {
+             const dataMap: any = {};
+             filterRows.forEach(r => {
+                dataMap[r.key] = ((options as any)[r.key] || []).map((o: any) => o.val);
+             });
+             invertAllActiveFilters(dataMap);
+          }}
+          className={`w-full py-3 rounded-xl font-bold text-[10px] uppercase tracking-[0.1em] flex items-center justify-center gap-2 transition-all ${
+            dark 
+              ? 'bg-blue-950/40 text-blue-400 border border-blue-900/50 hover:bg-blue-900 hover:text-white' 
+              : 'bg-blue-50 text-blue-700 border border-blue-100 hover:bg-blue-600 hover:text-white'
+          }`}
+        >
+          <ArrowRightLeft size={13} />
+          INVERTIR ACTIVOS
+        </button>
         <button
           onClick={clearAll}
-          className={`w-full py-3.5 rounded-2xl font-bold text-[11px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 transition-all ${
+          className={`w-full py-3 rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-2 transition-all ${
             dark 
               ? 'bg-red-950/20 text-red-500 border border-red-900/50 hover:bg-red-600 hover:text-white shadow-lg' 
               : 'bg-red-50 text-red-700 border border-red-100 hover:bg-red-600 hover:text-white shadow-md'
           }`}
         >
-          <Trash2 size={15} />
+          <Trash2 size={13} />
           LIMPIAR TODO
         </button>
       </div>
