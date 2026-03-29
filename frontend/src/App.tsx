@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { useDashboardStore } from './store/useDashboardStore';
 import { processRecord, ProcessedDebtRecord } from './utils/dataProcessor';
 import { Sidebar } from './components/Sidebar';
@@ -14,7 +14,9 @@ import {
   Coins,
   History,
   Activity,
-  Download
+  Download,
+  BarChart3,
+  Table2
 } from 'lucide-react';
 
 import * as XLSX from 'xlsx';
@@ -80,6 +82,9 @@ export default function App() {
   const linkedInvoices = useMemo(() => filteredData.length, [filteredData]);
   const totalClients = useMemo(() => new Set(filteredData.map(i => i.cliente)).size, [filteredData]);
 
+  const chartsRef = useRef<HTMLDivElement>(null);
+  const tableRef = useRef<HTMLDivElement>(null);
+
   if (loading) return (
     <div className={`flex items-center justify-center h-screen ${dark ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
       <div className="flex flex-col items-center">
@@ -89,19 +94,38 @@ export default function App() {
     </div>
   );
 
+  const scrollToSection = (section: 'charts' | 'table') => {
+    const ref = section === 'charts' ? chartsRef : tableRef;
+    ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   return (
     <div className={`flex w-screen h-screen overflow-hidden ${dark ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
       <Sidebar data={data} />
        <main className="flex-1 overflow-y-auto scrollbar-hide relative">
-        <div className={`sticky top-0 z-50 flex justify-between items-end pl-4 pr-10 py-2 border-b backdrop-blur-xl shadow-lg ${dark ? 'bg-slate-950/80 border-slate-800' : 'bg-slate-50/80 border-slate-200'}`}>
-          <div className="flex gap-8 items-end">
+        <div className={`sticky top-0 z-50 flex items-end pl-4 pr-10 py-2 border-b backdrop-blur-xl shadow-lg ${dark ? 'bg-slate-950/80 border-slate-800' : 'bg-slate-50/80 border-slate-200'}`}>
+          <div className="flex gap-8 items-end shrink-0 mr-auto">
             <KPICard title="DEUDA" value={totalDebt} isAmount dark={dark} icon={<Coins className="text-blue-500" size={16} />} />
             <KPICard title="VENCIDA" value={debtOverdue} isAmount dark={dark} icon={<History className="text-red-500" size={16} />} />
             <KPICard title="FACTURAS" value={linkedInvoices} dark={dark} icon={<FileText className="text-indigo-400" size={16} />} />
             <KPICard title="CLIENTES" value={totalClients} dark={dark} icon={<FilterIcon className="text-emerald-500" size={16} />} />
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 shrink-0">
+            <button 
+              onClick={() => scrollToSection('charts')} 
+              className={`p-2.5 rounded-xl border transition-all shadow-md ${dark ? 'bg-slate-800 border-slate-700 hover:bg-slate-700' : 'bg-white border-slate-200 hover:bg-slate-50 hover:shadow-xl'}`}
+              title="Ir a Gráficos"
+            >
+              <BarChart3 size={18} className="text-amber-500" />
+            </button>
+            <button 
+              onClick={() => scrollToSection('table')} 
+              className={`p-2.5 rounded-xl border transition-all shadow-md ${dark ? 'bg-slate-800 border-slate-700 hover:bg-slate-700' : 'bg-white border-slate-200 hover:bg-slate-50 hover:shadow-xl'}`}
+              title="Ir a Detalle Facturas"
+            >
+              <Table2 size={18} className="text-cyan-500" />
+            </button>
             <GlobalSearch data={data} dark={dark} />
             <button onClick={() => toggleDarkMode()} className={`p-2.5 rounded-xl border transition-all ${dark ? 'bg-slate-900 border-slate-700 text-yellow-500 shadow-xl' : 'bg-white border-slate-200 text-slate-400 shadow-md hover:shadow-xl'}`}>
               {dark ? <Sun size={18} /> : <Moon size={18} />}
@@ -112,7 +136,8 @@ export default function App() {
           </div>
         </div>
 
-        <div className="grid grid-cols-8 gap-4 mb-4 mt-6 pl-4 pr-10">
+        {/* Charts Section */}
+        <div ref={chartsRef} className="grid grid-cols-8 gap-4 mb-4 mt-6 pl-4 pr-10 scroll-mt-16">
           <div className={`col-span-6 p-6 rounded-[1.5rem] border transition-all duration-500 ${dark ? 'bg-slate-900/40 border-slate-800 shadow-[0_20px_50px_rgba(0,0,0,0.3)]' : 'bg-white border-slate-200 shadow-2xl'} h-[480px]`}>
             <TemporalDistChart 
               filteredData={filteredData} 
@@ -125,7 +150,7 @@ export default function App() {
             <div className={`w-full h-[240px] p-4 rounded-[1.5rem] border transition-all duration-500 shrink-0 ${dark ? 'bg-slate-900/40 border-slate-800' : 'bg-white border-slate-200 shadow-2xl'}`}>
               <StatusComparisonChart data={data} filteredData={filteredData} />
             </div>
-            <div className="flex-1 min-h-0">
+            <div className="flex-1 min-h-0 relative">
                <SummaryStatusTable filteredData={filteredData} dark={dark} />
             </div>
           </div>
@@ -136,14 +161,16 @@ export default function App() {
           <div className={`col-span-2 p-6 rounded-[1.5rem] border transition-all duration-500 ${dark ? 'bg-slate-900/40 border-slate-800 shadow-2xl' : 'bg-white border-slate-200 shadow-xl'} h-[300px]`}>
              <EntityPieChart data={data} filteredData={filteredData} />
           </div>
-          {/* Empty Placeholder Card */}
           <div className={`col-span-2 rounded-[1.5rem] border border-dashed transition-all duration-500 flex items-center justify-center p-6 bg-transparent h-[300px] ${dark ? 'border-slate-800/30 text-slate-700' : 'border-slate-300 text-slate-300'}`}>
             <span className="text-[10px] uppercase font-bold tracking-[0.3em] opacity-50">Espacio Reservado</span>
           </div>
         </div>
 
-        <div className={`rounded-[1.5rem] border transition-all duration-500 mb-12 overflow-hidden ml-4 mr-10 ${dark ? 'bg-slate-900/40 border-slate-800 shadow-2xl' : 'bg-white border-slate-200 shadow-xl'}`}>
-          <DebtTable data={filteredData} />
+        {/* Table Section */}
+        <div ref={tableRef} className="mt-2 mb-12 ml-4 mr-10 relative scroll-mt-16">
+          <div className={`rounded-[1.5rem] border transition-all duration-500 overflow-visible ${dark ? 'bg-slate-900/40 border-slate-800 shadow-2xl' : 'bg-white border-slate-200 shadow-xl'}`}>
+            <DebtTable data={filteredData} />
+          </div>
         </div>
       </main>
     </div>
@@ -216,15 +243,16 @@ export function SummaryStatusTable({ filteredData, dark }: { filteredData: Proce
   };
 
   return (
-      <div className={`w-full h-full relative rounded-none border flex flex-col overflow-hidden transition-all duration-500 ${dark ? 'bg-slate-900/40 border-slate-800 shadow-2xl' : 'bg-white border-slate-200 shadow-xl'}`}>
+      <div className="w-full h-full relative">
          <button 
            onClick={exportToExcel}
-           className={`absolute top-2 right-2 z-20 p-1.5 rounded-lg border transition-all ${dark ? 'bg-slate-800 border-slate-700 text-emerald-400 hover:bg-emerald-900/40 hover:text-emerald-300 shadow-lg' : 'bg-white border-slate-200 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 shadow-sm'}`}
+           className={`absolute -top-1 -right-10 z-20 p-1.5 rounded-lg border transition-all ${dark ? 'bg-slate-800 border-slate-700 text-emerald-400 hover:bg-emerald-900/40 hover:text-emerald-300 shadow-lg' : 'bg-white border-slate-200 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 shadow-md hover:shadow-xl'}`}
            title="Exportar a Excel"
          >
            <Download size={14} />
          </button>
-         <div className="flex-1 overflow-y-auto scrollbar-hide p-1 bg-gradient-to-b from-transparent to-slate-500/5">
+         <div className={`w-full h-full rounded-[1.5rem] border flex flex-col overflow-hidden transition-all duration-500 ${dark ? 'bg-slate-900/40 border-slate-800 shadow-2xl' : 'bg-white border-slate-200 shadow-xl'}`}>
+           <div className="flex-1 overflow-y-auto scrollbar-hide p-1 bg-gradient-to-b from-transparent to-slate-500/5">
             <table className="w-full text-left">
                <thead className={`sticky top-0 backdrop-blur-md z-10 ${dark ? 'bg-slate-900/90 text-slate-500' : 'bg-white/90 text-slate-400'}`}>
                   <tr>
@@ -267,5 +295,6 @@ export function SummaryStatusTable({ filteredData, dark }: { filteredData: Proce
             </table>
          </div>
       </div>
+    </div>
   );
 }

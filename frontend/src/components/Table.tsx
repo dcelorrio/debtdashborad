@@ -91,15 +91,16 @@ export const DebtTable = ({ data }: { data: ProcessedDebtRecord[] }) => {
   };
 
   return (
-    <div className="relative overflow-x-auto overflow-y-auto max-h-[800px] scrollbar-hide">
+    <div className="relative">
       <button 
         onClick={exportToExcel}
-        className={`absolute top-1.5 right-4 z-20 p-1.5 rounded-lg border transition-all ${dark ? 'bg-slate-800 border-slate-700 text-emerald-400 hover:bg-emerald-900/40 hover:text-emerald-300 shadow-lg' : 'bg-white border-slate-200 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 shadow-sm'}`}
+        className={`absolute top-1 -right-10 z-20 p-1.5 rounded-lg border transition-all ${dark ? 'bg-slate-800 border-slate-700 text-emerald-400 hover:bg-emerald-900/40 hover:text-emerald-300 shadow-lg' : 'bg-white border-slate-200 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 shadow-md hover:shadow-xl'}`}
         title="Exportar a Excel"
       >
         <Download size={14} />
       </button>
-      <table className="w-full text-left border-collapse whitespace-nowrap">
+      <div className="overflow-x-auto overflow-y-auto max-h-[800px] scrollbar-hide">
+        <table className="w-full text-left border-collapse whitespace-nowrap">
         <thead className={`sticky top-0 z-10 ${dark ? 'bg-slate-900 border-slate-700 shadow-xl text-slate-400' : 'bg-white border-slate-200 shadow-sm text-slate-500'} border-b`}>
           <tr>
             <SortTh label="Empresa" colKey="empresa" className="px-3 text-center" />
@@ -208,11 +209,11 @@ export const DebtTable = ({ data }: { data: ProcessedDebtRecord[] }) => {
                       <span 
                         onClick={() => toggleFilter('gestion', 'SÍ')}
                         className={`cursor-pointer px-1 py-0 rounded-[3px] text-[7px] font-bold uppercase tracking-widest border hover:brightness-125 ${dark ? 'bg-orange-950/60 text-orange-400 border-orange-900/50' : 'bg-orange-50 text-orange-600 border-orange-200'}`}
-                        title={item.comentario || 'Asunto en gestión (sin comentarios adjuntos)'}
                       >
                         GESTIÓN
                       </span>
-                      <div className="absolute hidden group-hover/tooltip:block z-50 bottom-full mb-1 left-1/2 -translate-x-1/2 w-64 p-2 text-[10px] sm:text-xs font-normal whitespace-pre-wrap rounded-lg shadow-xl shadow-black/50 border pointer-events-none break-words bg-slate-800 text-slate-200 border-slate-600">
+                      <div className="absolute hidden group-hover/tooltip:block z-50 bottom-full mb-1 left-1/2 -translate-x-1/2 min-w-[250px] max-w-md w-max p-2.5 text-[11px] sm:text-xs font-medium whitespace-pre-wrap rounded-lg shadow-2xl border pointer-events-none break-words bg-slate-700 text-slate-100 border-slate-500">
+                        <span className="font-bold text-orange-400 block mb-1 uppercase tracking-widest text-[9px]">COMENTARIO</span>
                         {item.comentario || 'Asunto en gestión (sin comentarios adjuntos)'}
                       </div>
                     </div>
@@ -246,6 +247,7 @@ export const DebtTable = ({ data }: { data: ProcessedDebtRecord[] }) => {
           ))}
         </tbody>
       </table>
+      </div>
     </div>
   );
 };

@@ -9,6 +9,7 @@ export type FilterKey =
 interface DashboardStore {
   filters: Record<FilterKey, (string | number)[]>;
   isDarkMode: boolean;
+  hoveredComment: string | null;
 
   toggleFilter: (key: FilterKey, value: string | number) => void;
   setFilter: (key: FilterKey, values: (string | number)[]) => void;
@@ -16,6 +17,7 @@ interface DashboardStore {
   invertFilter: (key: FilterKey, allPossibleValues: (string | number)[]) => void;
   invertAllActiveFilters: (dataMap: Record<FilterKey, (string | number)[]>) => void;
   toggleDarkMode: () => void;
+  setHoveredComment: (comment: string | null) => void;
   clearAll: () => void;
   
   // Legacy aliases for components not updated yet
@@ -34,6 +36,7 @@ const initialFilters: Record<FilterKey, (string | number)[]> = {
 export const useDashboardStore = create<DashboardStore>((set) => ({
   filters: { ...initialFilters },
   isDarkMode: true,
+  hoveredComment: null,
 
   toggleFilter: (key, value) => set((state) => {
     const current = state.filters[key];
@@ -50,6 +53,8 @@ export const useDashboardStore = create<DashboardStore>((set) => ({
   clearFilter: (key) => set((state) => ({
     filters: { ...state.filters, [key]: [] }
   })),
+
+  setHoveredComment: (comment) => set({ hoveredComment: comment }),
 
   invertFilter: (key, allPossibleValues) => set((state) => {
     const current = state.filters[key];
