@@ -24,6 +24,9 @@ export interface ProcessedDebtRecord {
   idempresa: number;
   empresa: string;
   contrato: string | null;
+  comentario: string | null;
+  condicion_pago: string | null;
+  nombre_comercial: string | null;
   vencimiento: Date;
   dias_vencidos: number;
 }
@@ -82,6 +85,9 @@ export const processRecord = (record: any): ProcessedDebtRecord => {
     z_tags,
     cargo_abono: record.cargo_abono || (record.importe >= 0 ? 'CARGO' : 'ABONO'),
     doc_pago: record.doc_pago || record.forma_pago,
-    forma_pago: getMappedPayment(record.forma_pago)
+    forma_pago: getMappedPayment(record.forma_pago),
+    comentario: record.comentario || record.Observaciones || null,
+    condicion_pago: record.condicionpago || record.condicion_pago || null,
+    nombre_comercial: record.nombre_comercial || null
   };
 };
