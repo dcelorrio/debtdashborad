@@ -4,6 +4,7 @@ import { processRecord, ProcessedDebtRecord } from './utils/dataProcessor';
 import { Sidebar } from './components/Sidebar';
 import { TemporalDistChart, EntityPieChart, StatusComparisonChart, PaymentMethodPieChart } from './components/Charts';
 import { DebtTable } from './components/Table';
+import { GlobalSearch } from './components/GlobalSearch';
 import { 
   FileText, 
   RefreshCw, 
@@ -56,6 +57,8 @@ export default function App() {
         if (key === 'vencido' && !selected.includes(item.vencido ? 'SÍ' : 'NO')) return false;
         if (key === 'etiquetas' && !item.tag_list.some(t => selected.includes(t as string))) return false;
         if (key === 'contrato' && !(item.contrato && item.contrato.split(',').some(c => selected.includes(c.trim().toUpperCase())))) return false;
+        if (key === 'nfactura' && !selected.includes(item.nfactura)) return false;
+        if (key === 'cod_cliente' && !selected.includes(item.cod_cliente)) return false;
       }
       return true;
     });
@@ -94,7 +97,7 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-3">
-
+            <GlobalSearch data={data} dark={dark} />
             <button onClick={() => toggleDarkMode()} className={`p-2.5 rounded-xl border transition-all ${dark ? 'bg-slate-900 border-slate-700 text-yellow-500 shadow-xl' : 'bg-white border-slate-200 text-slate-400 shadow-md hover:shadow-xl'}`}>
               {dark ? <Sun size={18} /> : <Moon size={18} />}
             </button>
