@@ -121,11 +121,11 @@ export const TemporalDistChart = ({ filteredData, mode, setMode }: { filteredDat
     tooltip: {
       trigger: 'axis',
       backgroundColor: dark ? '#0f172a' : '#ffffff',
-      textStyle: { color: dark ? '#cbd5e1' : '#1e3a8a', fontSize: 13, fontWeight: '1000' },
+      textStyle: { color: dark ? '#cbd5e1' : '#1e3a8a', fontSize: 13, fontWeight: 'bold' },
       formatter: (params: any) => {
-        let res = `<div style="padding:4px 8px; font-weight:1000; text-transform:uppercase; font-size:11px;">${params[0].axisValueLabel}</div>`;
+        let res = `<div style="padding:4px 8px; font-weight:bold; text-transform:uppercase; font-size:11px;">${params[0].axisValueLabel}</div>`;
         params.forEach((p: any) => {
-          if (p.value > 0) res += `<div style="padding:2px 8px; display:flex; justify-content:space-between; gap:20px; font-size:12px; font-weight:1000;"><span style="color:${p.color}">● DEUDA GLOBAL</span><span style="color:${dark ? '#fff' : '#000'}">${formatK(p.value)}</span></div>`;
+          if (p.value > 0) res += `<div style="padding:2px 8px; display:flex; justify-content:space-between; gap:20px; font-size:12px; font-weight:bold;"><span style="color:${p.color}">● DEUDA GLOBAL</span><span style="color:${dark ? '#fff' : '#000'}">${formatK(p.value)}</span></div>`;
         });
         return res;
       }
@@ -153,7 +153,7 @@ export const TemporalDistChart = ({ filteredData, mode, setMode }: { filteredDat
     },
     yAxis: {
       type: 'value',
-      axisLabel: { color: dark ? '#334155' : '#94a3b8', fontSize: 10, fontWeight: 'bold', formatter: (v: number) => `${Math.round(v/1000)}K` },
+      axisLabel: { color: dark ? '#334155' : '#94a3b8', fontSize: 10, fontWeight: '600', formatter: (v: number) => `${Math.round(v/1000)}K` },
       splitLine: { lineStyle: { color: dark ? '#1e293b' : '#f1f5f9' } }
     },
     series
@@ -164,7 +164,7 @@ export const TemporalDistChart = ({ filteredData, mode, setMode }: { filteredDat
       <div className="flex justify-end items-center mb-1 px-4">
         <div className="flex bg-slate-100/10 p-1 rounded-xl gap-1 ring-1 ring-white/5">
           {['MES', 'TRIMESTRE', 'AÑO'].map(m => (
-            <button key={m} onClick={() => setMode(m)} className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-[0.1em] transition-all ${
+            <button key={m} onClick={() => setMode(m)} className={`px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase tracking-[0.1em] transition-all ${
                mode === m ? 'bg-blue-600 text-white shadow-xl' : dark ? 'text-slate-600 hover:text-white' : 'text-slate-400 hover:text-slate-900'
             }`}>{m}</button>
           ))}
@@ -214,8 +214,8 @@ const SimpleIntersectionPie = ({
     color: MASTER_PALETTE,
     tooltip: {
       backgroundColor: dark ? '#0f172a' : '#ffffff',
-      textStyle: { color: dark ? '#cbd5e1' : '#1e3a8a', fontSize: 13, fontWeight: '1000' },
-      formatter: (p: any) => `<div style="padding:6px 10px; font-weight:1000; text-transform:uppercase;">● ${p.name}: ${formatK(p.value)}</div>`
+      textStyle: { color: dark ? '#cbd5e1' : '#1e3a8a', fontSize: 13, fontWeight: 'bold' },
+      formatter: (p: any) => `<div style="padding:6px 10px; font-weight:bold; text-transform:uppercase;">● ${p.name}: ${formatK(p.value)}</div>`
     },
     legend: {
       type: 'scroll',
@@ -223,7 +223,7 @@ const SimpleIntersectionPie = ({
       right: '2%',
       top: '0%',
       selectedMode: true,
-      textStyle: { color: dark ? '#64748b' : '#334155', fontSize: 11, fontWeight: '1000', textTransform: 'uppercase' },
+      textStyle: { color: dark ? '#64748b' : '#334155', fontSize: 11, fontWeight: 'bold', textTransform: 'uppercase' },
       itemGap: 10,
       formatter: (name: string) => {
         const item = chartData.find(d => d.name === name);
@@ -250,14 +250,14 @@ const SimpleIntersectionPie = ({
   if (chartData.length === 0) {
       return (
         <div className="w-full h-full flex flex-col items-center justify-center opacity-20">
-           <span className="text-[10px] font-black uppercase tracking-widest">{title} VACÍO</span>
+           <span className="text-[10px] font-bold uppercase tracking-widest">{title} VACÍO</span>
         </div>
       );
   }
 
   return (
     <div className="w-full h-full relative flex flex-col pt-4">
-       <h3 className={`absolute top-0 left-4 text-[20px] font-[1000] uppercase tracking-[0.15em] ${dark ? 'text-slate-200' : 'text-slate-800'} z-10`}>{title}</h3>
+       <h3 className={`absolute top-0 left-4 text-[20px] font-extrabold uppercase tracking-[0.15em] ${dark ? 'text-slate-200' : 'text-slate-800'} z-10`}>{title}</h3>
        <div className="flex-1 mt-4">
          <ReactECharts 
             option={option} 
