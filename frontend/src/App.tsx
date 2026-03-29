@@ -85,7 +85,7 @@ export default function App() {
     <div className={`flex w-screen h-screen overflow-hidden ${dark ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
       <Sidebar data={data} />
        <main className="flex-1 overflow-y-auto scrollbar-hide relative">
-        <div className={`sticky top-0 z-50 flex justify-between items-end px-10 py-2 border-b backdrop-blur-xl shadow-lg ${dark ? 'bg-slate-950/80 border-slate-800' : 'bg-slate-50/80 border-slate-200'}`}>
+        <div className={`sticky top-0 z-50 flex justify-between items-end pl-4 pr-10 py-2 border-b backdrop-blur-xl shadow-lg ${dark ? 'bg-slate-950/80 border-slate-800' : 'bg-slate-50/80 border-slate-200'}`}>
           <div className="flex gap-8 items-end">
             <KPICard title="DEUDA" value={totalDebt} isAmount dark={dark} icon={<Coins className="text-blue-500" size={16} />} />
             <KPICard title="VENCIDA" value={debtOverdue} isAmount dark={dark} icon={<History className="text-red-500" size={16} />} />
@@ -94,10 +94,7 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className={`flex items-center gap-2.5 px-4 py-2 rounded-xl border ${dark ? 'bg-slate-900 border-slate-700 shadow-2xl' : 'bg-white border-slate-200 shadow-lg'}`}>
-              <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-              <span className={`text-[12px] font-bold uppercase tracking-[0.3em] ${dark ? 'text-slate-300' : 'text-slate-800'}`}>SATYA ANALYTICS • 2026/2027</span>
-            </div>
+
             <button onClick={() => toggleDarkMode()} className={`p-2.5 rounded-xl border transition-all ${dark ? 'bg-slate-900 border-slate-700 text-yellow-500 shadow-xl' : 'bg-white border-slate-200 text-slate-400 shadow-md hover:shadow-xl'}`}>
               {dark ? <Sun size={18} /> : <Moon size={18} />}
             </button>
@@ -107,8 +104,8 @@ export default function App() {
           </div>
         </div>
 
-        <div className="grid grid-cols-8 gap-4 mb-4 mt-6 px-10">
-          <div className={`col-span-6 p-6 rounded-[2.5rem] border transition-all duration-500 ${dark ? 'bg-slate-900/40 border-slate-800 shadow-[0_20px_50px_rgba(0,0,0,0.3)]' : 'bg-white border-slate-200 shadow-2xl'} h-[480px]`}>
+        <div className="grid grid-cols-8 gap-4 mb-4 mt-6 pl-4 pr-10">
+          <div className={`col-span-6 p-6 rounded-[1.5rem] border transition-all duration-500 ${dark ? 'bg-slate-900/40 border-slate-800 shadow-[0_20px_50px_rgba(0,0,0,0.3)]' : 'bg-white border-slate-200 shadow-2xl'} h-[480px]`}>
             <TemporalDistChart 
               filteredData={filteredData} 
               mode={temporalMode} 
@@ -117,7 +114,7 @@ export default function App() {
           </div>
           
           <div className="col-span-2 row-span-2 flex flex-col gap-4 h-[796px]">
-            <div className={`w-full h-[240px] p-4 rounded-[2.5rem] border transition-all duration-500 shrink-0 ${dark ? 'bg-slate-900/40 border-slate-800' : 'bg-white border-slate-200 shadow-2xl'}`}>
+            <div className={`w-full h-[240px] p-4 rounded-[1.5rem] border transition-all duration-500 shrink-0 ${dark ? 'bg-slate-900/40 border-slate-800' : 'bg-white border-slate-200 shadow-2xl'}`}>
               <StatusComparisonChart data={data} filteredData={filteredData} />
             </div>
             <div className="flex-1 min-h-0">
@@ -125,19 +122,19 @@ export default function App() {
             </div>
           </div>
 
-          <div className={`col-span-2 p-6 rounded-[2.5rem] border transition-all duration-500 ${dark ? 'bg-slate-900/40 border-slate-800 shadow-2xl' : 'bg-white border-slate-200 shadow-xl'} h-[300px]`}>
+          <div className={`col-span-2 p-6 rounded-[1.5rem] border transition-all duration-500 ${dark ? 'bg-slate-900/40 border-slate-800 shadow-2xl' : 'bg-white border-slate-200 shadow-xl'} h-[300px]`}>
              <PaymentMethodPieChart data={data} filteredData={filteredData} />
           </div>
-          <div className={`col-span-2 p-6 rounded-[2.5rem] border transition-all duration-500 ${dark ? 'bg-slate-900/40 border-slate-800 shadow-2xl' : 'bg-white border-slate-200 shadow-xl'} h-[300px]`}>
+          <div className={`col-span-2 p-6 rounded-[1.5rem] border transition-all duration-500 ${dark ? 'bg-slate-900/40 border-slate-800 shadow-2xl' : 'bg-white border-slate-200 shadow-xl'} h-[300px]`}>
              <EntityPieChart data={data} filteredData={filteredData} />
           </div>
           {/* Empty Placeholder Card */}
-          <div className={`col-span-2 rounded-[2.5rem] border border-dashed transition-all duration-500 flex items-center justify-center p-6 bg-transparent h-[300px] ${dark ? 'border-slate-800/30 text-slate-700' : 'border-slate-300 text-slate-300'}`}>
+          <div className={`col-span-2 rounded-[1.5rem] border border-dashed transition-all duration-500 flex items-center justify-center p-6 bg-transparent h-[300px] ${dark ? 'border-slate-800/30 text-slate-700' : 'border-slate-300 text-slate-300'}`}>
             <span className="text-[10px] uppercase font-bold tracking-[0.3em] opacity-50">Espacio Reservado</span>
           </div>
         </div>
 
-        <div className={`rounded-[2.5rem] border transition-all duration-500 mb-12 overflow-hidden mx-10 ${dark ? 'bg-slate-900/40 border-slate-800 shadow-2xl' : 'bg-white border-slate-200 shadow-xl'}`}>
+        <div className={`rounded-[1.5rem] border transition-all duration-500 mb-12 overflow-hidden ml-4 mr-10 ${dark ? 'bg-slate-900/40 border-slate-800 shadow-2xl' : 'bg-white border-slate-200 shadow-xl'}`}>
           <div className="px-10 py-6 border-b flex justify-between items-center bg-opacity-10 backdrop-blur-md">
              <h3 className={`text-[12px] font-bold uppercase tracking-[0.5em] ${dark ? 'text-slate-500' : 'text-slate-500'}`}>DETALLE DE CARTERA ACTIVA</h3>
              <span className={`px-4 py-1.5 rounded-xl text-[10px] font-bold tracking-widest ${dark ? 'bg-blue-950/40 text-blue-400 border border-blue-900/50' : 'bg-blue-50 text-blue-700 border border-blue-100'}`}>

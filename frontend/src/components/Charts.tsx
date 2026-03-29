@@ -220,7 +220,7 @@ const SimpleIntersectionPie = ({
     legend: {
       type: 'scroll',
       orient: 'vertical',
-      right: '2%',
+      left: '46%',
       top: '0%',
       selectedMode: true,
       textStyle: { color: dark ? '#64748b' : '#334155', fontSize: 11, fontWeight: 'bold', textTransform: 'uppercase' },
@@ -233,7 +233,7 @@ const SimpleIntersectionPie = ({
     series: [{
       type: 'pie',
       radius: filterKey === 'gestion' ? ['55%', '85%'] : ['35%', '65%'],
-      center: ['30%', '50%'],
+      center: ['22%', '50%'],
       itemStyle: { borderRadius: 10 },
       label: { show: false },
       emphasis: { scale: true, scaleSize: 10 },
