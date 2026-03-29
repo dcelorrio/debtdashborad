@@ -200,18 +200,15 @@ function SummaryStatusTable({ filteredData, dark }: { filteredData: ProcessedDeb
   }, [filteredData]);
 
   return (
-      <div className={`w-full h-full rounded-[2.5rem] border flex flex-col overflow-hidden transition-all duration-500 ${dark ? 'bg-slate-900/40 border-slate-800 shadow-2xl' : 'bg-white border-slate-200 shadow-xl'}`}>
-         <div className="px-6 py-3 border-b border-opacity-50 flex justify-between items-center">
-            <h3 className={`text-[12px] font-extrabold uppercase tracking-[0.3em] ${dark ? 'text-slate-400' : 'text-slate-500'}`}>RESUMEN ESTADOS</h3>
-         </div>
-         <div className="flex-1 overflow-y-auto scrollbar-hide p-1.5 bg-gradient-to-b from-transparent to-slate-500/5">
+      <div className={`w-full h-full rounded-none border flex flex-col overflow-hidden transition-all duration-500 ${dark ? 'bg-slate-900/40 border-slate-800 shadow-2xl' : 'bg-white border-slate-200 shadow-xl'}`}>
+         <div className="flex-1 overflow-y-auto scrollbar-hide p-1 bg-gradient-to-b from-transparent to-slate-500/5">
             <table className="w-full text-left">
                <thead className={`sticky top-0 backdrop-blur-md z-10 ${dark ? 'bg-slate-900/90 text-slate-500' : 'bg-white/90 text-slate-400'}`}>
                   <tr>
-                    <th className="px-2 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-tl-xl border-b border-transparent">EMPRESA</th>
-                    <th className="px-2 py-1.5 text-[10px] font-bold uppercase tracking-widest border-b border-transparent">CLIENTE</th>
-                    <th className="px-2 py-1.5 text-[10px] font-bold uppercase tracking-widest text-center border-b border-transparent">ESTADO</th>
-                    <th className="px-2 py-1.5 text-[10px] font-bold uppercase tracking-widest text-right rounded-tr-xl border-b border-transparent">IMPORTE</th>
+                    <th className="px-2 py-1 text-[10px] font-bold uppercase tracking-widest border-b border-transparent">EMPRESA</th>
+                    <th className="px-2 py-1 text-[10px] font-bold uppercase tracking-widest border-b border-transparent">CLIENTE</th>
+                    <th className="px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-center border-b border-transparent">ESTADO</th>
+                    <th className="px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-right border-b border-transparent">IMPORTE</th>
                   </tr>
                </thead>
                <tbody className={`divide-y ${dark ? 'divide-slate-800/50' : 'divide-slate-100'}`}>
@@ -228,17 +225,17 @@ function SummaryStatusTable({ filteredData, dark }: { filteredData: ProcessedDeb
                         <td 
                            onClick={() => toggleFilter('empresa', row.empresa)}
                            title={row.empresa}
-                           className={`px-2 py-1 text-[10px] font-bold tracking-tight truncate max-w-[60px] cursor-pointer hover:underline ${isEmpresaFiltered ? (dark ? 'bg-blue-900/40 text-blue-300' : 'bg-blue-100/50 text-blue-700') : (dark ? 'text-slate-400' : 'text-slate-500')}`} 
+                           className={`px-2 py-0.5 text-[10px] font-bold tracking-tight truncate max-w-[60px] cursor-pointer hover:underline ${isEmpresaFiltered ? (dark ? 'bg-blue-900/40 text-blue-300' : 'bg-blue-100/50 text-blue-700') : (dark ? 'text-slate-400' : 'text-slate-500')}`} 
                         >{row.empresa}</td>
                         <td 
                            onClick={() => toggleFilter('cliente', row.cliente)}
                            title={row.cliente}
-                           className={`px-2 py-1 text-[11px] font-semibold tracking-tight truncate max-w-[120px] cursor-pointer hover:underline ${isClienteFiltered ? (dark ? 'bg-blue-900/40 text-blue-300' : 'bg-blue-100/50 text-blue-700') : (dark ? 'text-slate-200' : 'text-slate-700')}`} 
+                           className={`px-2 py-0.5 text-[11px] font-semibold tracking-tight truncate max-w-[120px] cursor-pointer hover:underline ${isClienteFiltered ? (dark ? 'bg-blue-900/40 text-blue-300' : 'bg-blue-100/50 text-blue-700') : (dark ? 'text-slate-200' : 'text-slate-700')}`} 
                         >{row.cliente}</td>
-                        <td className="px-2 py-1 text-center cursor-pointer" onClick={() => setFilter('entidad', Array.from(row.rawEntidades))}>
-                           <span className={`px-1.5 py-0.5 rounded text-[9px] font-extrabold shadow-sm border hover:border-blue-400 transition-all ${isEstadoFiltered ? 'ring-2 ring-blue-500 ring-offset-1 ' + (dark ? 'ring-offset-slate-900' : 'ring-offset-white') : ''} ${badgeColor}`}>{row.estado}</span>
+                        <td className="px-2 py-0.5 text-center cursor-pointer" onClick={() => setFilter('entidad', Array.from(row.rawEntidades))}>
+                           <span className={`px-1.5 py-0 rounded text-[9px] font-extrabold shadow-sm border hover:border-blue-400 transition-all ${isEstadoFiltered ? 'ring-2 ring-blue-500 ring-offset-1 ' + (dark ? 'ring-offset-slate-900' : 'ring-offset-white') : ''} ${badgeColor}`}>{row.estado}</span>
                         </td>
-                        <td className={`px-2 py-1 text-[11px] font-extrabold text-right ${dark ? 'text-slate-100' : 'text-slate-900'}`}>
+                        <td className={`px-2 py-0.5 text-[11px] font-extrabold text-right ${dark ? 'text-slate-100' : 'text-slate-900'}`}>
                            {(row.importe / 1000).toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}K
                         </td>
                      </tr>
