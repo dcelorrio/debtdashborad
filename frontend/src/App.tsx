@@ -160,6 +160,8 @@ const KPICard = ({ title, value, dark, isAmount, icon }: any) => (
 );
 
 function SummaryStatusTable({ filteredData, dark }: { filteredData: ProcessedDebtRecord[], dark: boolean }) {
+  const { toggleFilter, setFilter, filters } = useDashboardStore();
+
   const summary = useMemo(() => {
      const getEstado = (ent: string) => {
         if (!ent || ent === 'NULL' || ent === 'SIN ENTIDAD') return 'NO';
@@ -170,27 +172,19 @@ function SummaryStatusTable({ filteredData, dark }: { filteredData: ProcessedDeb
         return 'SI';
      };
 
-     const getEmpresa = (raw: string) => {
-        if (!raw) return 'DESCONOCIDA';
-        const up = raw.toUpperCase();
-        if (up.includes('SATYA')) return 'SATYA';
-        if (up.includes('INERTYA')) return 'INERTYA';
-        if (up.includes('NAVYA')) return 'NAVYA';
-        if (up.includes('INVARYA')) return 'INVARYA';
-        return raw.split(' ')[0];
-     };
-
-     const groups: Record<string, { empresa: string, cliente: string, estado: string, importe: number }> = {};
+     const groups: Record<string, { empresa: string, cliente: string, estado: string, importe: number, rawEntidades: Set<string> }> = {};
      
      filteredData.forEach(item => {
-         const st = getEstado(item.entidad || '');
-         const emp = getEmpresa(item.empresa);
+         const rawEnt = item.entidad || 'SIN ENTIDAD';
+         const st = getEstado(rawEnt);
+         const emp = item.empresa;
          const cli = item.cliente || 'DESCONOCIDO';
          const key = `${emp}_${cli}_${st}`;
          if (!groups[key]) {
-            groups[key] = { empresa: emp, cliente: cli, estado: st, importe: 0 };
+            groups[key] = { empresa: emp, cliente: cli, estado: st, importe: 0, rawEntidades: new Set() };
          }
          groups[key].importe += item.pendiente;
+         groups[key].rawEntidades.add(rawEnt);
      });
      
      return Object.values(groups).sort((a,b) => {
@@ -207,12 +201,12 @@ function SummaryStatusTable({ filteredData, dark }: { filteredData: ProcessedDeb
 
   return (
       <div className={`w-full h-full rounded-[2.5rem] border flex flex-col overflow-hidden transition-all duration-500 ${dark ? 'bg-slate-900/40 border-slate-800 shadow-2xl' : 'bg-white border-slate-200 shadow-xl'}`}>
-         <div className="px-6 py-3 border-b border-opacity-50">
+         <div className="px-6 py-3 border-b border-opacity-50 flex justify-between items-center">
             <h3 className={`text-[12px] font-extrabold uppercase tracking-[0.3em] ${dark ? 'text-slate-400' : 'text-slate-500'}`}>RESUMEN ESTADOS</h3>
          </div>
          <div className="flex-1 overflow-y-auto scrollbar-hide p-1.5 bg-gradient-to-b from-transparent to-slate-500/5">
             <table className="w-full text-left">
-               <thead className={`sticky top-0 backdrop-blur-md ${dark ? 'bg-slate-900/90 text-slate-500' : 'bg-white/90 text-slate-400'}`}>
+               <thead className={`sticky top-0 backdrop-blur-md z-10 ${dark ? 'bg-slate-900/90 text-slate-500' : 'bg-white/90 text-slate-400'}`}>
                   <tr>
                     <th className="px-2 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-tl-xl border-b border-transparent">EMPRESA</th>
                     <th className="px-2 py-1.5 text-[10px] font-bold uppercase tracking-widest border-b border-transparent">CLIENTE</th>
@@ -223,13 +217,26 @@ function SummaryStatusTable({ filteredData, dark }: { filteredData: ProcessedDeb
                <tbody className={`divide-y ${dark ? 'divide-slate-800/50' : 'divide-slate-100'}`}>
                   {summary.map((row, i) => {
                      const isSi = row.estado === 'SI';
-                     const badgeColor = isSi ? (dark ? 'bg-emerald-950 text-emerald-400 ring-emerald-900/50' : 'bg-emerald-50 text-emerald-600 ring-emerald-100') : (dark ? 'bg-slate-800 text-blue-400 ring-slate-700' : 'bg-blue-50 text-blue-600 ring-blue-100');
+                     const badgeColor = isSi ? (dark ? 'bg-emerald-950 text-emerald-400 border-emerald-900/50' : 'bg-emerald-50 text-emerald-600 border-emerald-200') : (dark ? 'bg-slate-800 text-blue-400 border-slate-700' : 'bg-blue-50 text-blue-600 border-blue-200');
+                     
+                     const isEmpresaFiltered = filters.empresa.includes(row.empresa);
+                     const isClienteFiltered = filters.cliente.includes(row.cliente);
+                     const isEstadoFiltered = Array.from(row.rawEntidades).some(ent => filters.entidad.includes(ent));
+                     
                      return (
                      <tr key={i} className={`group ${dark ? 'hover:bg-slate-800/50' : 'hover:bg-slate-50'} transition-all`}>
-                        <td className={`px-2 py-1 text-[10px] font-bold tracking-tight truncate max-w-[60px] ${dark ? 'text-slate-400' : 'text-slate-500'}`} title={row.empresa}>{row.empresa}</td>
-                        <td className={`px-2 py-1 text-[11px] font-semibold tracking-tight truncate max-w-[120px] ${dark ? 'text-slate-200' : 'text-slate-700'}`} title={row.cliente}>{row.cliente}</td>
-                        <td className="px-2 py-1 text-center">
-                           <span className={`px-1.5 py-0.5 rounded text-[9px] font-extrabold shadow-sm ring-1 ${badgeColor}`}>{row.estado}</span>
+                        <td 
+                           onClick={() => toggleFilter('empresa', row.empresa)}
+                           title={row.empresa}
+                           className={`px-2 py-1 text-[10px] font-bold tracking-tight truncate max-w-[60px] cursor-pointer hover:underline ${isEmpresaFiltered ? (dark ? 'bg-blue-900/40 text-blue-300' : 'bg-blue-100/50 text-blue-700') : (dark ? 'text-slate-400' : 'text-slate-500')}`} 
+                        >{row.empresa}</td>
+                        <td 
+                           onClick={() => toggleFilter('cliente', row.cliente)}
+                           title={row.cliente}
+                           className={`px-2 py-1 text-[11px] font-semibold tracking-tight truncate max-w-[120px] cursor-pointer hover:underline ${isClienteFiltered ? (dark ? 'bg-blue-900/40 text-blue-300' : 'bg-blue-100/50 text-blue-700') : (dark ? 'text-slate-200' : 'text-slate-700')}`} 
+                        >{row.cliente}</td>
+                        <td className="px-2 py-1 text-center cursor-pointer" onClick={() => setFilter('entidad', Array.from(row.rawEntidades))}>
+                           <span className={`px-1.5 py-0.5 rounded text-[9px] font-extrabold shadow-sm border hover:border-blue-400 transition-all ${isEstadoFiltered ? 'ring-2 ring-blue-500 ring-offset-1 ' + (dark ? 'ring-offset-slate-900' : 'ring-offset-white') : ''} ${badgeColor}`}>{row.estado}</span>
                         </td>
                         <td className={`px-2 py-1 text-[11px] font-extrabold text-right ${dark ? 'text-slate-100' : 'text-slate-900'}`}>
                            {(row.importe / 1000).toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}K

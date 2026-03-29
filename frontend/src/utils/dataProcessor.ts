@@ -51,6 +51,15 @@ export const processRecord = (record: any): ProcessedDebtRecord => {
     if (s.includes('PAGARE')) return 'PAGARÉ';
     return s || 'OTROS';
   };
+  // Entity/Company Normalization
+  const getEmpresaNormalizada = (raw: string): string => {
+    const s = String(raw || 'SIN EMPRESA').toUpperCase();
+    if (s.includes('SATYA') || s.includes('SEGURIDAD AVANZADA') || s.includes('ABVANZADA')) return 'SATYA';
+    if (s.includes('INERTYA')) return 'INERTYA';
+    if (s.includes('NAVYA')) return 'NAVYA';
+    if (s.includes('INVARYA')) return 'INVARYA';
+    return s.split(' ')[0] || 'SIN EMPRESA';
+  };
 
   return {
     ...record,
@@ -66,7 +75,7 @@ export const processRecord = (record: any): ProcessedDebtRecord => {
     retencion: Boolean(record.retencion === 1 || record.retencion === true),
     vencido: Boolean(record.vencido === 1 || record.vencido === true),
     idempresa: Number(record.idempresa || 0),
-    empresa: (record.empresa_nombre || 'SIN EMPRESA').toUpperCase(),
+    empresa: getEmpresaNormalizada(record.empresa_nombre),
     // Logic: Contrato comes from record.contrato OR Z_ tags
     contrato: record.contrato || (z_tags.length > 0 ? z_tags.join(', ') : null),
     tag_list,
