@@ -153,8 +153,8 @@ const KPICard = ({ title, value, dark, isAmount, icon }: any) => (
       {icon}
       <span className={`text-[10px] font-bold uppercase tracking-[0.3em] ${dark ? 'text-slate-400' : 'text-slate-600'}`}>{title}</span>
     </div>
-    <span className={`text-[28px] font-extrabold tracking-tighter leading-none font-mono ${dark ? 'text-slate-100' : 'text-slate-800'}`}>
-      {isAmount ? `${(value / 1000000).toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}M` : value.toLocaleString('es-ES')}
+    <span className={`${isAmount ? 'text-[18px]' : 'text-[28px]'} font-extrabold tracking-tighter leading-none font-mono ${dark ? 'text-slate-100' : 'text-slate-800'}`}>
+      {isAmount ? value.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €' : value.toLocaleString('es-ES')}
     </span>
   </div>
 );
