@@ -21,24 +21,19 @@ def clean_encoding(text):
     return text
 
 def get_oracle_connection():
-    # Priority: Env Var > CONTROLOTS sibling > local file
-    conexiones_path = os.getenv("ORACLE_CONNECTIONS_PATH")
-    
-    if not conexiones_path:
-        conexiones_path = os.path.join(os.path.dirname(__file__), "..", "..", "CONTROLOTS", "conexiones.json")
-        
-    if not os.path.exists(conexiones_path):
-        conexiones_path = os.path.join(os.path.dirname(__file__), "..", "conexiones.json")
-        
-    with open(conexiones_path, "r", encoding="utf-8") as f:
-        config = json.load(f)
-    conn_info = config["conexiones_usadas"][0]
-    connection = oracledb.connect(
-        user=conn_info["usuario"],
-        password=conn_info["password"],
-        dsn=f"{conn_info['servidor']}:{conn_info['puerto']}/{conn_info['sid_service']}"
-    )
-    return connection
+    # Priority: Direct Env Vars (Mandatory)
+    user = os.getenv("DB_USER")
+    password = os.getenv("DB_PASSWORD")
+    host = os.getenv("DB_HOST")
+    port = os.getenv("DB_PORT", "1521")
+    service_name = os.getenv("DB_SERVICE_NAME")
+
+    if not all([user, password, host, service_name]):
+        missing = [k for k, v in {"DB_USER": user, "DB_PASSWORD": password, "DB_HOST": host, "DB_SERVICE_NAME": service_name}.items() if not v]
+        raise EnvironmentError(f"Missing mandatory database environment variables: {', '.join(missing)}")
+
+    dsn = f"{host}:{port}/{service_name}"
+    return oracledb.connect(user=user, password=password, dsn=dsn)
 
 def execute_query(query, params=None):
     conn = get_oracle_connection()

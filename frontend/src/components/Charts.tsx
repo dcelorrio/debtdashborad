@@ -77,40 +77,41 @@ export const TemporalDistChart = ({ filteredData, mode, setMode }: { filteredDat
       if (!key) return;
 
       const parts = String(key).split('-');
-      // Resolve anyo based on format: "T1 24" vs "2024-02"
-      // Wait, params.name in ECharts event is the original category data, which we map in xAxis:
-      // xAxis.data is the formatted string. Wait! I need to ensure params.name holds the original key, or rely on data[i].name matching the original key.
-      // We stored the original key in `data: timeKeys.map(key => ({ name: key, ... }))`.
-      // ECharts provides the 'data' object's `name` property inside `params.name`.
       const anyoStr = parts[0];
       const anyo = parseInt(anyoStr, 10);
       
+      const getFormattedLabel = (m: number, y: number) => `${getMonthAbbr(m)} ${String(y).slice(-2)}`;
+
       if (mode === 'AÑO') {
           toggleFilter('anyo', anyo);
       } else if (mode === 'MES') {
           const mes = parseInt(parts[1], 10);
+          const mesLabel = getFormattedLabel(mes, anyo);
+          
           const isOnlyThis = filters.anyo.length === 1 && filters.anyo[0] === anyo && 
-                             filters.mes.length === 1 && filters.mes[0] === mes;
+                             filters.mes_label.length === 1 && filters.mes_label[0] === mesLabel;
+          
           if (isOnlyThis) {
               setFilter('anyo', []);
-              setFilter('mes', []);
+              setFilter('mes_label', []);
           } else {
               setFilter('anyo', [anyo]);
-              setFilter('mes', [mes]);
+              setFilter('mes_label', [mesLabel]);
           }
       } else if (mode === 'TRIMESTRE') {
           const q = parseInt(parts[1].replace('Q', ''), 10);
           const months = [q * 3 - 2, q * 3 - 1, q * 3];
+          const mesLabels = months.map(m => getFormattedLabel(m, anyo));
           
           const isOnlyThis = filters.anyo.length === 1 && filters.anyo[0] === anyo && 
-                             filters.mes.length === 3 && months.every(m => filters.mes.includes(m));
+                             filters.mes_label.length === 3 && mesLabels.every(l => filters.mes_label.includes(l));
           
           if (isOnlyThis) {
              setFilter('anyo', []);
-             setFilter('mes', []);
+             setFilter('mes_label', []);
           } else {
              setFilter('anyo', [anyo]);
-             setFilter('mes', months);
+             setFilter('mes_label', mesLabels);
           }
       }
   };
