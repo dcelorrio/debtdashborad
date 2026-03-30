@@ -304,3 +304,71 @@ export const StatusComparisonChart = ({ data, filteredData }: any) => (
     customColors={{ 'SÍ': '#ef4444', 'NO': '#3b82f6' }}
   />
 );
+
+export const QuickFilters = ({ data }: { data: any[] }) => {
+    const { filters, setFilter } = useDashboardStore();
+    
+    // Check if the current filter state matches the "Efectos Vencidos" criteria
+    const isVencidosActive = 
+      filters.abono.includes('NO') && 
+      filters.vencido.includes('SÍ') && 
+      filters.retencion.includes('NO') && 
+      filters.entidad.length > 0 && 
+      !filters.entidad.includes('PAGADO') && 
+      !filters.entidad.includes('PROGRESO');
+  
+    const applyVencidos = () => {
+      if (isVencidosActive) {
+        // Reset these filters
+        setFilter('abono', []);
+        setFilter('vencido', []);
+        setFilter('retencion', []);
+        setFilter('entidad', []);
+      } else {
+        // Apply the pre-defined filter set
+        setFilter('abono', ['NO']);
+        setFilter('vencido', ['SÍ']);
+        setFilter('retencion', ['NO']);
+        
+        // Exclude specific entities
+        const allEntidades = Array.from(new Set(data.map(item => item.entidad)));
+        const filteredEntidades = allEntidades.filter(e => e !== 'PAGADO' && e !== 'PROGRESO');
+        setFilter('entidad', filteredEntidades);
+      }
+    };
+  
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-4">
+        <button 
+          onClick={applyVencidos}
+          className={`px-8 py-4 rounded-full text-white font-bold transition-all duration-300 shadow-xl relative overflow-hidden group 
+            ${isVencidosActive ? 'scale-105 brightness-110' : 'opacity-90 hover:opacity-100 hover:scale-105 active:scale-95'}`}
+          style={{
+            background: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
+            border: '2px solid rgba(255,255,255,0.2)',
+            boxShadow: isVencidosActive 
+                ? '0 10px 25px -5px rgba(56, 239, 125, 0.6), inset 0 2px 5px rgba(255,255,255,0.4)' 
+                : '0 10px 20px -10px rgba(0,0,0,0.3), inset 0 2px 3px rgba(255,255,255,0.3)'
+          }}
+        >
+          {/* Glossy overlay mimicking QlikView / Aqua style */}
+          <div className="absolute top-0 left-0 right-0 h-[45%] bg-gradient-to-b from-white/40 to-transparent rounded-t-full pointer-events-none mx-[5%] mt-[2%]" 
+               style={{ 
+                 filter: 'blur(1px)',
+               }} />
+          
+          <span className="relative z-10 text-xl tracking-tight font-[800] drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)]">
+            Efectos Vencidos
+          </span>
+          
+          {/* Glow background on hover */}
+          <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        </button>
+        
+        <div className="flex flex-col items-center opacity-50">
+           <span className="text-[10px] uppercase font-black tracking-[0.4em]">Filtro Rápido</span>
+           {isVencidosActive && <span className="text-[9px] font-bold text-teal-400 mt-1">ACTIVE</span>}
+        </div>
+      </div>
+    );
+  };

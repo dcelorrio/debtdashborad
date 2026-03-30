@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo, useRef } from 'react';
 import { useDashboardStore } from './store/useDashboardStore';
 import { processRecord, ProcessedDebtRecord } from './utils/dataProcessor';
 import { Sidebar } from './components/Sidebar';
-import { TemporalDistChart, EntityPieChart, StatusComparisonChart, PaymentMethodPieChart } from './components/Charts';
+import { TemporalDistChart, EntityPieChart, QuickFilters, StatusComparisonChart, PaymentMethodPieChart } from './components/Charts';
 import { DebtTable } from './components/Table';
 import { GlobalSearch } from './components/GlobalSearch';
 import { 
@@ -162,8 +162,8 @@ export default function App() {
           <div className={`col-span-2 p-6 rounded-[1.5rem] border transition-all duration-500 ${dark ? 'bg-slate-900/40 border-slate-800 shadow-2xl' : 'bg-white border-slate-200 shadow-xl'} h-[300px]`}>
              <EntityPieChart data={data} filteredData={filteredData} />
           </div>
-          <div className={`col-span-2 rounded-[1.5rem] border border-dashed transition-all duration-500 flex items-center justify-center p-6 bg-transparent h-[300px] ${dark ? 'border-slate-800/30 text-slate-700' : 'border-slate-300 text-slate-300'}`}>
-            <span className="text-[10px] uppercase font-bold tracking-[0.3em] opacity-50">Espacio Reservado</span>
+          <div className={`col-span-2 rounded-[1.5rem] transition-all duration-500 overflow-hidden ${dark ? 'bg-slate-900/50' : 'bg-white/50 shadow-sm'}`}>
+            <QuickFilters data={data} />
           </div>
         </div>
 
