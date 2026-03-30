@@ -30,7 +30,7 @@ export default function App() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost:8001/api/debt-report');
+        const response = await fetch('/api/debt-report');
         if (!response.ok) throw new Error('Error al cargar datos');
         const rawData = await response.json();
         const processed = rawData.map(processRecord);
