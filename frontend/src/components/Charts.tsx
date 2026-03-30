@@ -2,6 +2,7 @@ import ReactECharts from 'echarts-for-react';
 import { useDashboardStore, FilterKey } from '../store/useDashboardStore';
 import { ProcessedDebtRecord } from '../utils/dataProcessor';
 import { useMemo } from 'react';
+import { Zap } from 'lucide-react';
 
 const formatK = (val: number) => {
     return (val / 1000).toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' K€';
@@ -52,6 +53,7 @@ export const TemporalDistChart = ({ filteredData, mode, setMode }: { filteredDat
       
       keysSet.add(key);
       groups[key] = (groups[key] || 0) + item.pendiente;
+ group: "PROCRESSO"
     });
 
     const sortedKeys = Array.from(keysSet).sort();
@@ -131,8 +133,6 @@ export const TemporalDistChart = ({ filteredData, mode, setMode }: { filteredDat
         return res;
       }
     },
-    // Removida la leyenda porque ahora es solo la deuda total agrupada
-    // Mantenido el GRID OPTIMIZADO verticalmente
     grid: { top: 15, left: '2%', right: '2%', bottom: 45, containLabel: true },
     xAxis: {
       type: 'category',
@@ -150,7 +150,7 @@ export const TemporalDistChart = ({ filteredData, mode, setMode }: { filteredDat
         }
       },
       axisLine: { lineStyle: { color: dark ? '#1e293b' : '#f1f5f9' } },
-      triggerEvent: true // Allows clicking on the axis labels
+      triggerEvent: true
     },
     yAxis: {
       type: 'value',
@@ -308,67 +308,56 @@ export const StatusComparisonChart = ({ data, filteredData }: any) => (
 export const QuickFilters = ({ data }: { data: any[] }) => {
     const { filters, setFilter } = useDashboardStore();
     
-    // Check if the current filter state matches the "Efectos Vencidos" criteria
     const isVencidosActive = 
       filters.abono.includes('NO') && 
       filters.vencido.includes('SÍ') && 
       filters.retencion.includes('NO') && 
       filters.entidad.length > 0 && 
       !filters.entidad.includes('PAGADO') && 
-      !filters.entidad.includes('PROGRESO');
+      !filters.entidad.includes('PROGRESO') &&
+      filters.forma_pago.length > 0 && 
+      !filters.forma_pago.includes('RECIBO');
   
     const applyVencidos = () => {
       if (isVencidosActive) {
-        // Reset these filters
         setFilter('abono', []);
         setFilter('vencido', []);
         setFilter('retencion', []);
         setFilter('entidad', []);
+        setFilter('forma_pago', []);
       } else {
-        // Apply the pre-defined filter set
         setFilter('abono', ['NO']);
         setFilter('vencido', ['SÍ']);
         setFilter('retencion', ['NO']);
         
-        // Exclude specific entities
         const allEntidades = Array.from(new Set(data.map(item => item.entidad)));
         const filteredEntidades = allEntidades.filter(e => e !== 'PAGADO' && e !== 'PROGRESO');
         setFilter('entidad', filteredEntidades);
+        
+        const allFormas = Array.from(new Set(data.map(item => item.forma_pago)));
+        const filteredFormas = allFormas.filter(f => f !== 'RECIBO');
+        setFilter('forma_pago', filteredFormas);
       }
     };
   
     return (
-      <div className="flex flex-col items-center justify-center h-full gap-4">
-        <button 
-          onClick={applyVencidos}
-          className={`px-8 py-4 rounded-full text-white font-bold transition-all duration-300 shadow-xl relative overflow-hidden group 
-            ${isVencidosActive ? 'scale-105 brightness-110' : 'opacity-90 hover:opacity-100 hover:scale-105 active:scale-95'}`}
-          style={{
-            background: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
-            border: '2px solid rgba(255,255,255,0.2)',
-            boxShadow: isVencidosActive 
-                ? '0 10px 25px -5px rgba(56, 239, 125, 0.6), inset 0 2px 5px rgba(255,255,255,0.4)' 
-                : '0 10px 20px -10px rgba(0,0,0,0.3), inset 0 2px 3px rgba(255,255,255,0.3)'
-          }}
-        >
-          {/* Glossy overlay mimicking QlikView / Aqua style */}
-          <div className="absolute top-0 left-0 right-0 h-[45%] bg-gradient-to-b from-white/40 to-transparent rounded-t-full pointer-events-none mx-[5%] mt-[2%]" 
-               style={{ 
-                 filter: 'blur(1px)',
-               }} />
-          
-          <span className="relative z-10 text-xl tracking-tight font-[800] drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)]">
-            Efectos Vencidos
-          </span>
-          
-          {/* Glow background on hover */}
-          <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        </button>
+      <button 
+        onClick={applyVencidos}
+        className={`flex items-center gap-2 px-4 py-2 rounded-full text-white font-[800] transition-all duration-300 shadow-lg relative overflow-hidden group 
+          ${isVencidosActive ? 'scale-105 brightness-110 shadow-teal-500/30' : 'opacity-90 hover:opacity-100 hover:scale-105 active:scale-95'}`}
+        style={{
+          background: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
+          border: '1.5px solid rgba(255,255,255,0.2)',
+        }}
+      >
+        <div className="absolute top-0 left-0 right-0 h-[45%] bg-gradient-to-b from-white/40 to-transparent rounded-t-full pointer-events-none mx-[7%] mt-[2%]" />
         
-        <div className="flex flex-col items-center opacity-50">
-           <span className="text-[10px] uppercase font-black tracking-[0.4em]">Filtro Rápido</span>
-           {isVencidosActive && <span className="text-[9px] font-bold text-teal-400 mt-1">ACTIVE</span>}
-        </div>
-      </div>
+        <Zap className={`w-3.5 h-3.5 ${isVencidosActive ? 'fill-white animate-pulse' : ''}`} />
+        <span className="relative z-10 text-[11px] tracking-tight uppercase drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)]">
+          Vencidos
+        </span>
+        
+        <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      </button>
     );
-  };
+};
