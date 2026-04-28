@@ -4,7 +4,7 @@ export type FilterKey =
   | 'anyo' | 'mes' | 'forma_pago' | 'mes_doc' | 'cliente' | 'doc_pago' 
   | 'cargo_abono' | 'vencido' | 'retencion' | 'importe' | 'contrato' 
   | 'entidad' | 'cod_cliente' | 'etiquetas' | 'gestion' | 'idempresa' | 'empresa' | 'nfactura'
-  | 'mes_label' | 'mes_doc_label' | 'abono';
+  | 'mes_label' | 'mes_doc_label' | 'abono' | 'pendiente';
 
 interface DashboardStore {
   filters: Record<FilterKey, (string | number)[]>;
@@ -30,7 +30,7 @@ const initialFilters: Record<FilterKey, (string | number)[]> = {
   anyo: [], mes: [], forma_pago: [], mes_doc: [], cliente: [], doc_pago: [],
   cargo_abono: [], vencido: [], retencion: [], importe: [], contrato: [],
   entidad: [], cod_cliente: [], etiquetas: [], gestion: [], idempresa: [], empresa: [], nfactura: [],
-  mes_label: [], mes_doc_label: [], abono: []
+  mes_label: [], mes_doc_label: [], abono: [], pendiente: []
 };
 
 export const useDashboardStore = create<DashboardStore>((set) => ({

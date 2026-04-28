@@ -67,6 +67,7 @@ export default function App() {
         if (key === 'mes_label' && !selected.includes(item.mes_label)) return false;
         if (key === 'mes_doc_label' && (item.mes_doc_label === null || !selected.includes(item.mes_doc_label))) return false;
         if (key === 'abono' && !selected.includes(item.abono)) return false;
+        if (key === 'pendiente' && !selected.includes(item.pendiente.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }))) return false;
       }
       return true;
     });

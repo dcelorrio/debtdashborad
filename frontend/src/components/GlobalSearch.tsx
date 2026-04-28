@@ -35,7 +35,8 @@ export function GlobalSearch({ data, dark }: GlobalSearchProps) {
     { key: 'entidad', label: 'ENTIDAD BANCARIA' },
     { key: 'forma_pago', label: 'FORMA PAGO' },
     { key: 'contrato', label: 'CONTRATO' },
-    { key: 'nfactura', label: 'Nº FACTURA' }
+    { key: 'nfactura', label: 'Nº FACTURA' },
+    { key: 'pendiente', label: 'IMPORTE PENDIENTE' }
   ];
 
   // Calculate matches dynamically based on query
@@ -57,9 +58,25 @@ export function GlobalSearch({ data, dark }: GlobalSearchProps) {
     data.forEach(item => {
       searchableFields.forEach(({ key }) => {
         const val = item[key as keyof ProcessedDebtRecord];
-        if (val) {
-           const strVal = String(val);
-           if (strVal.toLowerCase().includes(searchLower)) {
+        if (val !== undefined && val !== null) {
+           let strVal = String(val);
+           let matchFound = false;
+
+           if (key === 'pendiente') {
+             const numVal = Number(val);
+             strVal = numVal.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+             const strValNoDecimals = numVal.toLocaleString('es-ES', { maximumFractionDigits: 0 });
+             // Check if user's search query matches the formatted number with or without decimals
+             if (strVal.toLowerCase().includes(searchLower) || strValNoDecimals.toLowerCase().includes(searchLower)) {
+               matchFound = true;
+             }
+           } else {
+             if (strVal.toLowerCase().includes(searchLower)) {
+               matchFound = true;
+             }
+           }
+
+           if (matchFound) {
              uniqueValues[key].add(strVal);
            }
         }
