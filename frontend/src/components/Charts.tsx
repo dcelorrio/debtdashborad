@@ -39,7 +39,8 @@ const useStableColors = (data: ProcessedDebtRecord[], dimension: (item: Processe
 };
 
 export const TemporalDistChart = ({ filteredData, mode, setMode }: { filteredData: ProcessedDebtRecord[], mode: string, setMode: any }) => {
-  const { isDarkMode: dark, toggleFilter, setFilter, filters } = useDashboardStore();
+  const { isDarkMode: dark, toggleFilter, setFilter, filters, isSelectionMode, pendingFilters } = useDashboardStore();
+  const currentFilters = isSelectionMode ? pendingFilters : filters;
 
   const { chartData, timeKeys } = useMemo(() => {
     const groups: Record<string, number> = {};
@@ -68,10 +69,34 @@ export const TemporalDistChart = ({ filteredData, mode, setMode }: { filteredDat
     type: 'bar',
     emphasis: { focus: 'series' },
     itemStyle: { color: '#3b82f6', borderRadius: [4, 4, 0, 0] },
-    data: timeKeys.map(key => ({
-      name: key,
-      value: Math.round(chartData[key] || 0)
-    }))
+    data: timeKeys.map(key => {
+      const parts = String(key).split('-');
+      const anyo = parseInt(parts[0], 10);
+      let isSelected = false;
+      
+      if (currentFilters.anyo.length === 0 && currentFilters.mes_label.length === 0) {
+         isSelected = true;
+      } else {
+         if (mode === 'AÑO') {
+            isSelected = currentFilters.anyo.includes(anyo);
+         } else if (mode === 'MES' && parts[1]) {
+            const mes = parseInt(parts[1], 10);
+            const mesLabel = `${getMonthAbbr(mes)} ${String(anyo).slice(-2)}`;
+            isSelected = currentFilters.mes_label.includes(mesLabel);
+         } else if (mode === 'TRIMESTRE' && parts[1]) {
+            const q = parseInt(parts[1].replace('Q', ''), 10);
+            const months = [q * 3 - 2, q * 3 - 1, q * 3];
+            const mesLabels = months.map(m => `${getMonthAbbr(m)} ${String(anyo).slice(-2)}`);
+            isSelected = mesLabels.some(l => currentFilters.mes_label.includes(l));
+         }
+      }
+
+      return {
+        name: key,
+        value: Math.round(chartData[key] || 0),
+        itemStyle: { opacity: isSelected ? 1 : 0.3 }
+      };
+    })
   }];
 
   const handleBarClick = (params: any) => {
@@ -85,35 +110,37 @@ export const TemporalDistChart = ({ filteredData, mode, setMode }: { filteredDat
       const getFormattedLabel = (m: number, y: number) => `${getMonthAbbr(m)} ${String(y).slice(-2)}`;
 
       if (mode === 'AÑO') {
-          toggleFilter('anyo', anyo);
+          if (isSelectionMode) {
+              toggleFilter('anyo', anyo);
+          } else {
+              const isOnlyThis = currentFilters.anyo.length === 1 && currentFilters.anyo[0] === anyo;
+              setFilter('anyo', isOnlyThis ? [] : [anyo]);
+              setFilter('mes_label', []); 
+          }
       } else if (mode === 'MES') {
           const mes = parseInt(parts[1], 10);
           const mesLabel = getFormattedLabel(mes, anyo);
           
-          const isOnlyThis = filters.anyo.length === 1 && filters.anyo[0] === anyo && 
-                             filters.mes_label.length === 1 && filters.mes_label[0] === mesLabel;
-          
-          if (isOnlyThis) {
-              setFilter('anyo', []);
-              setFilter('mes_label', []);
+          if (isSelectionMode) {
+              toggleFilter('mes_label', mesLabel);
+              if (currentFilters.anyo.length > 0) setFilter('anyo', []); 
           } else {
-              setFilter('anyo', [anyo]);
-              setFilter('mes_label', [mesLabel]);
+              const isOnlyThis = currentFilters.mes_label.length === 1 && currentFilters.mes_label[0] === mesLabel;
+              setFilter('anyo', []);
+              setFilter('mes_label', isOnlyThis ? [] : [mesLabel]);
           }
       } else if (mode === 'TRIMESTRE') {
           const q = parseInt(parts[1].replace('Q', ''), 10);
           const months = [q * 3 - 2, q * 3 - 1, q * 3];
           const mesLabels = months.map(m => getFormattedLabel(m, anyo));
           
-          const isOnlyThis = filters.anyo.length === 1 && filters.anyo[0] === anyo && 
-                             filters.mes_label.length === 3 && mesLabels.every(l => filters.mes_label.includes(l));
-          
-          if (isOnlyThis) {
-             setFilter('anyo', []);
-             setFilter('mes_label', []);
+          if (isSelectionMode) {
+              mesLabels.forEach(l => toggleFilter('mes_label', l));
+              if (currentFilters.anyo.length > 0) setFilter('anyo', []); 
           } else {
-             setFilter('anyo', [anyo]);
-             setFilter('mes_label', mesLabels);
+              const isOnlyThis = currentFilters.mes_label.length === 3 && mesLabels.every(l => currentFilters.mes_label.includes(l));
+              setFilter('anyo', []);
+              setFilter('mes_label', isOnlyThis ? [] : mesLabels);
           }
       }
   };
@@ -199,8 +226,11 @@ const SimpleIntersectionPie = ({
   filterKey: FilterKey, 
   customColors?: Record<string, string> 
 }) => {
-  const { toggleFilter, isDarkMode: dark } = useDashboardStore();
+  const { toggleFilter, isDarkMode: dark, isSelectionMode, pendingFilters, filters } = useDashboardStore();
   const stableColors = useStableColors(fullData, dimension, MASTER_PALETTE);
+  
+  const currentFilters = isSelectionMode ? pendingFilters : filters;
+  const activeSelection = currentFilters[filterKey] || [];
 
   const chartData = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -242,7 +272,8 @@ const SimpleIntersectionPie = ({
           name: d.name,
           value: d.value,
           itemStyle: {
-            color: (customColors?.[d.name] || stableColors[d.name])
+            color: (customColors?.[d.name] || stableColors[d.name]),
+            opacity: activeSelection.length === 0 || activeSelection.includes(d.name) ? 1 : 0.3
           }
       }))
     }]
@@ -306,17 +337,18 @@ export const StatusComparisonChart = ({ data, filteredData }: any) => (
 );
 
 export const QuickFilters = ({ data }: { data: any[] }) => {
-    const { filters, setFilter } = useDashboardStore();
+    const { filters, setFilter, isSelectionMode, pendingFilters } = useDashboardStore();
+    const currentFilters = isSelectionMode ? pendingFilters : filters;
     
     const isVencidosActive = 
-      filters.abono.includes('NO') && 
-      filters.vencido.includes('SÍ') && 
-      filters.retencion.includes('NO') && 
-      filters.entidad.length > 0 && 
-      !filters.entidad.includes('PAGADO') && 
-      !filters.entidad.includes('PROGRESO') &&
-      filters.forma_pago.length > 0 && 
-      !filters.forma_pago.includes('RECIBO');
+      currentFilters.abono.includes('NO') && 
+      currentFilters.vencido.includes('SÍ') && 
+      currentFilters.retencion.includes('NO') && 
+      currentFilters.entidad.length > 0 && 
+      !currentFilters.entidad.includes('PAGADO') && 
+      !currentFilters.entidad.includes('PROGRESO') &&
+      currentFilters.forma_pago.length > 0 && 
+      !currentFilters.forma_pago.includes('RECIBO');
   
     const applyVencidos = () => {
       if (isVencidosActive) {

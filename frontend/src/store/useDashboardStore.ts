@@ -8,9 +8,12 @@ export type FilterKey =
 
 interface DashboardStore {
   filters: Record<FilterKey, (string | number)[]>;
+  pendingFilters: Record<FilterKey, (string | number)[]>;
+  isSelectionMode: boolean;
   isDarkMode: boolean;
   hoveredComment: string | null;
 
+  setIsSelectionMode: (active: boolean) => void;
   toggleFilter: (key: FilterKey, value: string | number) => void;
   setFilter: (key: FilterKey, values: (string | number)[]) => void;
   clearFilter: (key: FilterKey) => void;
@@ -35,49 +38,88 @@ const initialFilters: Record<FilterKey, (string | number)[]> = {
 
 export const useDashboardStore = create<DashboardStore>((set) => ({
   filters: { ...initialFilters },
+  pendingFilters: { ...initialFilters },
+  isSelectionMode: false,
   isDarkMode: true,
   hoveredComment: null,
 
+  setIsSelectionMode: (active) => set((state) => {
+    if (active && !state.isSelectionMode) {
+        return { isSelectionMode: true, pendingFilters: { ...state.filters } };
+    } else if (!active && state.isSelectionMode) {
+        return { isSelectionMode: false, filters: { ...state.pendingFilters } };
+    }
+    return state;
+  }),
+
   toggleFilter: (key, value) => set((state) => {
-    const current = state.filters[key];
+    const target = state.isSelectionMode ? state.pendingFilters : state.filters;
+    const current = target[key];
     const next = current.includes(value) 
       ? current.filter(v => v !== value) 
       : [...current, value];
-    return { filters: { ...state.filters, [key]: next } };
+      
+    if (state.isSelectionMode) {
+        return { pendingFilters: { ...state.pendingFilters, [key]: next } };
+    } else {
+        return { filters: { ...state.filters, [key]: next } };
+    }
   }),
 
-  setFilter: (key, values) => set((state) => ({
-    filters: { ...state.filters, [key]: values }
-  })),
+  setFilter: (key, values) => set((state) => {
+    if (state.isSelectionMode) {
+        return { pendingFilters: { ...state.pendingFilters, [key]: values } };
+    } else {
+        return { filters: { ...state.filters, [key]: values } };
+    }
+  }),
 
-  clearFilter: (key) => set((state) => ({
-    filters: { ...state.filters, [key]: [] }
-  })),
+  clearFilter: (key) => set((state) => {
+    if (state.isSelectionMode) {
+        return { pendingFilters: { ...state.pendingFilters, [key]: [] } };
+    } else {
+        return { filters: { ...state.filters, [key]: [] } };
+    }
+  }),
 
   setHoveredComment: (comment) => set({ hoveredComment: comment }),
 
   invertFilter: (key, allPossibleValues) => set((state) => {
-    const current = state.filters[key];
+    const target = state.isSelectionMode ? state.pendingFilters : state.filters;
+    const current = target[key];
     if (current.length === 0) return state; // Only invert active filters
     const inverted = allPossibleValues.filter(val => !current.includes(val));
-    return { filters: { ...state.filters, [key]: inverted } };
+    if (state.isSelectionMode) {
+        return { pendingFilters: { ...state.pendingFilters, [key]: inverted } };
+    } else {
+        return { filters: { ...state.filters, [key]: inverted } };
+    }
   }),
 
   invertAllActiveFilters: (dataMap) => set((state) => {
-    const nextFilters = { ...state.filters };
+    const target = state.isSelectionMode ? state.pendingFilters : state.filters;
+    const nextFilters = { ...target };
     let changed = false;
-    for (const key of Object.keys(state.filters) as FilterKey[]) {
-      if (state.filters[key].length > 0 && dataMap[key]) {
-        nextFilters[key] = dataMap[key].filter(val => !state.filters[key].includes(val));
+    for (const key of Object.keys(target) as FilterKey[]) {
+      if (target[key].length > 0 && dataMap[key]) {
+        nextFilters[key] = dataMap[key].filter(val => !target[key].includes(val));
         changed = true;
       }
     }
-    return changed ? { filters: nextFilters } : state;
+    if (changed) {
+        return state.isSelectionMode ? { pendingFilters: nextFilters } : { filters: nextFilters };
+    }
+    return state;
   }),
 
   toggleDarkMode: () => set((state) => ({ isDarkMode: !state.isDarkMode })),
   
-  clearAll: () => set({ filters: { ...initialFilters } }),
+  clearAll: () => set((state) => {
+    if (state.isSelectionMode) {
+       return { pendingFilters: { ...initialFilters } };
+    }
+    return { filters: { ...initialFilters } };
+  }),
 
   // Legacy Compatibility
   setSelectedYear: (val) => set((state) => ({ 

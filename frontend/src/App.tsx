@@ -44,6 +44,26 @@ export default function App() {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Control' || e.key === 'Meta') {
+        useDashboardStore.getState().setIsSelectionMode(true);
+      }
+    };
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key === 'Control' || e.key === 'Meta') {
+        useDashboardStore.getState().setIsSelectionMode(false);
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
+
   const getFilteredData = (excludeKey?: string) => {
     return data.filter(item => {
       for (const [key, selected] of Object.entries(filters)) {
@@ -195,7 +215,8 @@ const KPICard = ({ title, value, dark, isAmount, icon }: any) => (
 );
 
 export function SummaryStatusTable({ filteredData, dark }: { filteredData: ProcessedDebtRecord[], dark: boolean }) {
-  const { toggleFilter, setFilter, filters } = useDashboardStore();
+  const { toggleFilter, setFilter, filters, isSelectionMode, pendingFilters } = useDashboardStore();
+  const currentFilters = isSelectionMode ? pendingFilters : filters;
 
   const summary = useMemo(() => {
      const getEstado = (ent: string) => {
@@ -272,9 +293,9 @@ export function SummaryStatusTable({ filteredData, dark }: { filteredData: Proce
                      const isSi = row.estado === 'SI';
                      const badgeColor = isSi ? (dark ? 'bg-emerald-950 text-emerald-400 border-emerald-900/50' : 'bg-emerald-50 text-emerald-600 border-emerald-200') : (dark ? 'bg-slate-800 text-blue-400 border-slate-700' : 'bg-blue-50 text-blue-600 border-blue-200');
                      
-                     const isEmpresaFiltered = filters.empresa.includes(row.empresa);
-                     const isClienteFiltered = filters.cliente.includes(row.cliente);
-                     const isEstadoFiltered = Array.from(row.rawEntidades).some(ent => filters.entidad.includes(ent));
+                     const isEmpresaFiltered = currentFilters.empresa.includes(row.empresa);
+                     const isClienteFiltered = currentFilters.cliente.includes(row.cliente);
+                     const isEstadoFiltered = Array.from(row.rawEntidades).some(ent => currentFilters.entidad.includes(ent));
                      
                      return (
                      <tr key={i} className={`group ${dark ? 'hover:bg-slate-800/50' : 'hover:bg-slate-50'} transition-all`}>
