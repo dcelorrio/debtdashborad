@@ -24,7 +24,7 @@ export const Login: React.FC = () => {
             const formData = new URLSearchParams();
             formData.append('username', username);
             formData.append('password', password);
-            formData.append('scope', 'APP_DEUDA_ APP_FINANZAS_');
+            formData.append('scope', 'APP_DEUDA_');
 
             const response = await fetch('/token', {
                 method: 'POST',

@@ -24,7 +24,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     });
 
     const login = (newToken: string, newUser: User) => {
-        const allowedGroups = ["APP_DEUDA_ADMIN", "APP_DEUDA_USER", "APP_FINANZAS_ADMIN"];
+        const allowedGroups = ["APP_DEUDA_ADMIN", "APP_DEUDA_USER"];
         const hasPermission = newUser.groups.some(group => allowedGroups.includes(group));
 
         if (!hasPermission) {

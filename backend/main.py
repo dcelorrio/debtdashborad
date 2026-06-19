@@ -23,7 +23,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "SUPER_SECRET_KEY_CHANGE_THIS").strip(
 ALGORITHM = "HS256"
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-ALLOWED_GROUPS = {"APP_DEUDA_ADMIN", "APP_DEUDA_USER", "APP_FINANZAS_ADMIN"}
+ALLOWED_GROUPS = {"APP_DEUDA_ADMIN", "APP_DEUDA_USER"}
 
 class User(BaseModel):
     username: str
