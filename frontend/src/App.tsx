@@ -1,10 +1,13 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
+import { useAuth } from './auth/AuthContext';
+import { Login } from './components/Login';
 import { useDashboardStore } from './store/useDashboardStore';
 import { processRecord, ProcessedDebtRecord } from './utils/dataProcessor';
 import { Sidebar } from './components/Sidebar';
 import { TemporalDistChart, EntityPieChart, QuickFilters, StatusComparisonChart, PaymentMethodPieChart } from './components/Charts';
 import { DebtTable } from './components/Table';
 import { GlobalSearch } from './components/GlobalSearch';
+import { UserInfoModal } from './components/UserInfoModal';
 import { 
   FileText, 
   RefreshCw, 
@@ -13,24 +16,43 @@ import {
   Sun,
   Coins,
   History,
-  Activity,
   Download,
   BarChart3,
-  Table2
+  Table2,
+  LogOut,
+  UserCircle
 } from 'lucide-react';
 
 import * as XLSX from 'xlsx';
 
 export default function App() {
+  const { token, user, logout } = useAuth();
+  
   const [data, setData] = useState<ProcessedDebtRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [temporalMode, setTemporalMode] = useState<'MES' | 'TRIMESTRE' | 'AÑO'>('MES');
+  const [showUserModal, setShowUserModal] = useState(false);
   const { filters, isDarkMode: dark, toggleDarkMode, clearAll } = useDashboardStore();
 
+  const authFetch = async (url: string | URL | globalThis.Request, options: RequestInit = {}) => {
+      const headers = {
+          ...options.headers,
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      };
+      const response = await window.fetch(url, { ...options, headers });
+      if (response.status === 401) {
+          logout();
+          throw new Error("Sesión expirada o no autorizada. Por favor, inicia sesión de nuevo.");
+      }
+      return response;
+  };
+
   useEffect(() => {
+    if (!token) return;
+
     const fetchData = async () => {
       try {
-        const response = await fetch('/api/debt-report');
+        const response = await authFetch('/api/debt-report');
         if (!response.ok) throw new Error('Error al cargar datos');
         const rawData = await response.json();
         const processed = rawData.map(processRecord);
@@ -42,7 +64,7 @@ export default function App() {
       }
     };
     fetchData();
-  }, []);
+  }, [token]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -107,11 +129,25 @@ export default function App() {
   const chartsRef = useRef<HTMLDivElement>(null);
   const tableRef = useRef<HTMLDivElement>(null);
 
+  if (!token) {
+    return <Login />;
+  }
+
   if (loading) return (
-    <div className={`flex items-center justify-center h-screen ${dark ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
-      <div className="flex flex-col items-center">
-        <Activity className="animate-pulse text-blue-500 mb-4" size={56} />
-        <span className="font-bold uppercase tracking-[0.8em] text-[13px] opacity-80 text-blue-500">SATYA REBOOT VC5.6 FINAL</span>
+    <div className="min-h-screen bg-[#020617] flex flex-col items-center justify-center p-4">
+      <div className="flex flex-col items-center max-w-xs w-full bg-[#0f172a] rounded-2xl border border-slate-800 shadow-2xl p-8 animate-in fade-in zoom-in-95 duration-300">
+        <div className="mb-6 relative">
+          <img src="/satya_logo.png" alt="Logo" className="h-20 object-contain animate-pulse" />
+        </div>
+        
+        {/* Spinner */}
+        <div className="relative w-10 h-10 mb-6">
+          <div className="absolute inset-0 rounded-full border-4 border-slate-850" />
+          <div className="absolute inset-0 rounded-full border-4 border-t-rose-600 border-r-rose-600/30 border-b-rose-600/10 border-l-rose-600/0 animate-spin" />
+        </div>
+
+        <h2 className="text-white text-xs font-bold uppercase tracking-[0.2em] text-center mb-1">DEUDA SATYA</h2>
+        <p className="text-slate-500 text-[10px] font-bold uppercase tracking-wider text-center">Cargando Sistema...</p>
       </div>
     </div>
   );
@@ -158,6 +194,26 @@ export default function App() {
             <button onClick={clearAll} className={`p-2.5 rounded-xl border transition-all ${dark ? 'bg-red-950/30 border-red-900 text-red-500' : 'bg-red-50 border-red-200 text-red-600'} hover:bg-red-600 hover:text-white shadow-md hover:shadow-xl`}>
               <RefreshCw size={18} />
             </button>
+            <div className="w-px h-8 bg-gray-200 mx-1"></div>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => setShowUserModal(true)} 
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-xl transition-all border ${dark ? 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'} shadow-md hover:shadow-xl`}
+                title="Ver perfil de usuario"
+              >
+                <UserCircle size={18} className="text-rose-500" />
+                <span className="text-xs font-semibold hidden md:block">
+                  {user?.cn || user?.username || 'Usuario'}
+                </span>
+              </button>
+              <button 
+                onClick={logout} 
+                className={`p-2 rounded-xl border transition-all ${dark ? 'bg-slate-800 border-slate-700 text-slate-400 hover:text-rose-400 hover:bg-rose-950/30' : 'bg-white border-slate-200 text-slate-400 hover:text-rose-500 hover:bg-rose-50'} shadow-md hover:shadow-xl`}
+                title="Cerrar Sesión"
+              >
+                <LogOut size={16} />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -198,6 +254,12 @@ export default function App() {
           </div>
         </div>
       </main>
+
+      <UserInfoModal
+        isOpen={showUserModal}
+        onClose={() => setShowUserModal(false)}
+        userInfo={user}
+      />
     </div>
   );
 }

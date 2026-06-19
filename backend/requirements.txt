@@ -5,3 +5,5 @@ uvicorn
 pandas
 plotly
 dash
+python-jose[cryptography]
+passlib

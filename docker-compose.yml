@@ -15,6 +15,10 @@ services:
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
       - DB_SERVICE_NAME=${DB_SERVICE_NAME}
+      - SECRET_KEY=${SECRET_KEY}
+    networks:
+      - default
+      - net-sso
     restart: always
 
   # Frontend Nginx with built React app
@@ -27,4 +31,12 @@ services:
       - "3008:80"
     depends_on:
       - debt-dashboard-backend
+    networks:
+      - default
+      - net-sso
     restart: always
+
+networks:
+  default:
+  net-sso:
+    external: true
