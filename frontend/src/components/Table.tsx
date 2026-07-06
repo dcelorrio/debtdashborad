@@ -9,7 +9,7 @@ type SortDir = 'asc' | 'desc';
 import * as XLSX from 'xlsx';
 import { Download } from 'lucide-react';
 
-export const DebtTable = ({ data }: { data: ProcessedDebtRecord[] }) => {
+export const DebtTable = ({ data, onInvoiceClick }: { data: ProcessedDebtRecord[], onInvoiceClick: (idfacturacli: number) => void }) => {
   const { isDarkMode: dark, toggleFilter } = useDashboardStore();
   const [sortKey, setSortKey] = useState<SortKey | null>(null);
   const [sortDir, setSortDir] = useState<SortDir>('asc');
@@ -151,10 +151,26 @@ export const DebtTable = ({ data }: { data: ProcessedDebtRecord[] }) => {
               </td>
               
               {/* N Factura */}
-              <td className={`px-2 py-0.5 text-[9px] font-mono font-semibold cursor-pointer ${dark ? 'text-indigo-400 hover:text-indigo-200' : 'text-indigo-600 hover:text-indigo-800'}`}>
-                {item.nfactura ? item.nfactura.split(',').map((fac, i) => (
-                  <div key={i} onClick={() => toggleFilter('nfactura', fac.trim())}>{fac.trim()}</div>
-                )) : '-'}
+              <td className="px-2 py-0.5 text-[9px] font-mono font-semibold">
+                {item.nfactura ? (() => {
+                  const facs = item.nfactura.split(',');
+                  const ids = item.idfacturacli ? item.idfacturacli.split(',') : [];
+                  return facs.map((fac, i) => {
+                    const cleanFac = fac.trim();
+                    const cleanId = ids[i] ? ids[i].trim() : null;
+                    return (
+                      <span
+                        key={i}
+                        className={`cursor-pointer underline block hover:text-blue-500 transition-colors ${
+                          dark ? 'text-indigo-400 hover:text-indigo-200' : 'text-indigo-600 hover:text-indigo-800'
+                        }`}
+                        onClick={() => cleanId ? onInvoiceClick(parseInt(cleanId)) : toggleFilter('nfactura', cleanFac)}
+                      >
+                        {cleanFac}
+                      </span>
+                    );
+                  });
+                })() : '-'}
               </td>
               
               {/* Fechas */}

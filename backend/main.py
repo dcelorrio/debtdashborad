@@ -4,7 +4,7 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 import os
 from pydantic import BaseModel
-from get_debt_data import get_debt_report
+from get_debt_data import get_debt_report, get_invoice_details
 import uvicorn
 
 app = FastAPI(title="Debt Dashboard API")
@@ -64,6 +64,14 @@ def debt_report(current_user: User = Depends(get_current_user)):
     if data is None:
         raise HTTPException(status_code=500, detail="Error retrieving data from Oracle")
     return data
+
+@app.get("/api/invoice/{idfacturacli}")
+def invoice_details(idfacturacli: int, current_user: User = Depends(get_current_user)):
+    data = get_invoice_details(idfacturacli)
+    if data is None:
+        raise HTTPException(status_code=404, detail="Invoice not found or database error")
+    return data
+
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8001, reload=True)

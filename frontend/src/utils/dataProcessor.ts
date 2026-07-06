@@ -38,6 +38,7 @@ export interface ProcessedDebtRecord {
   vencimiento: Date;
   dias_vencidos: number;
   abono: string;
+  idfacturacli: string | null;
 }
 
 export const processRecord = (record: any): ProcessedDebtRecord => {
@@ -77,6 +78,7 @@ export const processRecord = (record: any): ProcessedDebtRecord => {
     ...record,
     cod_cliente: String(record.cod_cliente || ''),
     fdoc: record.fdoc || null,
+    idfacturacli: record.idfacturacli || null,
     mes_doc: fd ? fd.getMonth() + 1 : null,
     vencimiento: fv,
     anyo: fv.getFullYear(),
