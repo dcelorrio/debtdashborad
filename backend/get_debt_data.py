@@ -10,6 +10,8 @@ def get_debt_report():
         EMPRESA.NOMBRE AS EMPRESA_NOMBRE,
         (SELECT LISTAGG(FACTURACLI.NFACTURA, ', ') WITHIN GROUP (ORDER BY FACTURACLI.NFACTURA) 
          FROM FACTURACLI WHERE FACTURACLI.IDDEUDA=DEUDACLI.IDDEUDACLI) AS NFACTURA,
+        (SELECT LISTAGG(FACTURACLI.IDFACTURACLI, ', ') WITHIN GROUP (ORDER BY FACTURACLI.NFACTURA) 
+         FROM FACTURACLI WHERE FACTURACLI.IDDEUDA=DEUDACLI.IDDEUDACLI) AS IDFACTURACLI,
         (SELECT MIN(FFACTURA) FROM FACTURACLI WHERE FACTURACLI.IDDEUDA=DEUDACLI.IDDEUDACLI) AS FDOC,
         VENCIMIENTOCLI.FVENCIMIENTO, 
         VENCIMIENTOCLI.IMPORTE, 
@@ -74,6 +76,99 @@ def get_debt_report():
     except Exception as e:
         print(f"Error executing query: {e}")
         return None
+
+def get_invoice_details(idfacturacli: int):
+    header_query = """
+    SELECT 
+        f.idfacturacli,
+        f.nfactura,
+        f.ffactura,
+        f.foperacion,
+        f.fcontable,
+        f.fcobro,
+        f.cif as cliente_nif,
+        f.nombre as cliente_nombre,
+        f.idcliente,
+        e.nombre as empresa_nombre,
+        d.descripcion as delegacion_nombre,
+        sf.descripcioncorta as serie_codigo,
+        bp.descripcion as banco_precio_nombre,
+        fp.descripcion as forma_pago_nombre,
+        cp.descripcion as condicion_pago_nombre,
+        caja.descripcion as caja_nombre,
+        rf.descripcion as regimen_fiscal_nombre,
+        tf.descripcion as tipo_factura_nombre,
+        f.estado as estado_fiscal_codigo,
+        f.observaciones,
+        f.idasiento,
+        f.fenvio,
+        deudacli.estado as estado_deuda_codigo,
+        PKG_FACTURACLI.IMPORTENETOANTESDTOFACTURA(f.idfacturacli) as total_bruto,
+        f.dto as dto_porcentaje,
+        (PKG_FACTURACLI.IMPORTENETOANTESDTOFACTURA(f.idfacturacli) - PKG_FACTURACLI.IMPORTENETOFACTURA(f.idfacturacli)) as total_descuento,
+        PKG_FACTURACLI.IMPORTENETOFACTURA(f.idfacturacli) as total_neto,
+        PKG_FACTURACLI.TOTALIMPUESTOSFACTURA(f.idfacturacli) as total_impuestos,
+        PKG_FACTURACLI.IMPORTEFACTURA(f.idfacturacli) as total_factura,
+        PKG_FACTURACLI.IMPORTERETENCIONGARANTIA(f.idfacturacli) as total_retencion,
+        f.porcentaje_garantia,
+        f.fgarantia as plazo_garantia,
+        tg.descripcion as tipo_garantia_nombre
+    FROM FACTURACLI f
+    LEFT JOIN SERIE_FACTURACLI sf ON f.idserie_facturacli = sf.idserie_facturacli
+    LEFT JOIN EMPRESA e ON sf.idempresa = e.idempresa
+    LEFT JOIN DELEGACION d ON f.iddelegacion = d.iddelegacion
+    LEFT JOIN BANCO_PRECIO bp ON f.idbanco_precio = bp.idbanco_precio
+    LEFT JOIN FORMA_PAGO fp ON f.idforma_pago = fp.idforma_pago
+    LEFT JOIN CONDICION_PAGO cp ON f.idcondicion_pago = cp.idcondicion_pago
+    LEFT JOIN CAJA caja ON f.idcaja = caja.idcaja
+    LEFT JOIN REGIMEN_FISCAL rf ON f.idregimen_fiscal = rf.idregimen_fiscal
+    LEFT JOIN TFACTURACLI tf ON f.idtfacturacli = tf.idtfacturacli
+    LEFT JOIN DEUDACLI deudacli ON f.iddeuda = deudacli.iddeudacli
+    LEFT JOIN V_TGARANTIA_OBRA_CLASIF tg ON f.idtipo_garantia = tg.idtgarantia_obra_clasif
+    WHERE f.idfacturacli = :idfacturacli
+    """
+    lines_query = """
+    SELECT 
+        lf.idlfacturacli,
+        lf.codigo,
+        lf.descripcion,
+        lf.unidades,
+        lf.precio,
+        lf.dto,
+        lf.dto2,
+        lf.importe,
+        lf.iva,
+        lf.idglfacturacli,
+        gl.descripcion as grupo_descripcion,
+        gl.orden as grupo_orden,
+        CASE 
+            WHEN sis.descripcion IS NOT NULL AND sub.descripcion IS NOT NULL 
+                THEN sis.descripcion || ' -> ' || sub.descripcion 
+            WHEN sub.descripcion IS NOT NULL THEN sub.descripcion 
+            WHEN sis.descripcion IS NOT NULL THEN sis.descripcion 
+            ELSE NULL 
+        END as subsistema
+    FROM LFACTURACLI lf
+    LEFT JOIN SUBSIS sub ON lf.idsubsis = sub.idsubsis
+    LEFT JOIN SISTEMA sis ON lf.idsistema = sis.idsistema
+    LEFT JOIN GLFACTURACLI gl ON lf.idglfacturacli = gl.idglfacturacli
+    WHERE lf.idfacturacli = :idfacturacli
+    ORDER BY NVL(gl.orden, 9999), lf.idglfacturacli, lf.orden, lf.idlfacturacli
+    """
+
+    try:
+        headers = execute_query(header_query, {"idfacturacli": idfacturacli})
+        if not headers:
+            return None
+        lines = execute_query(lines_query, {"idfacturacli": idfacturacli})
+        return {
+            "header": headers[0],
+            "lines": lines or []
+        }
+    except Exception as e:
+        print(f"Error retrieving invoice details: {e}")
+        return None
+
 
 if __name__ == "__main__":
     report = get_debt_report()

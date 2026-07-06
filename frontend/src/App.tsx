@@ -8,6 +8,7 @@ import { TemporalDistChart, EntityPieChart, QuickFilters, StatusComparisonChart,
 import { DebtTable } from './components/Table';
 import { GlobalSearch } from './components/GlobalSearch';
 import { UserInfoModal } from './components/UserInfoModal';
+import { InvoiceModal } from './components/InvoiceModal';
 import { 
   FileText, 
   RefreshCw, 
@@ -33,6 +34,11 @@ export default function App() {
   const [temporalMode, setTemporalMode] = useState<'MES' | 'TRIMESTRE' | 'AÑO'>('MES');
   const [showUserModal, setShowUserModal] = useState(false);
   const { filters, isDarkMode: dark, toggleDarkMode, clearAll } = useDashboardStore();
+
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState<number | null>(null);
+  const [invoiceData, setInvoiceData] = useState<any>(null);
+  const [invoiceLoading, setInvoiceLoading] = useState(false);
+  const [invoiceError, setInvoiceError] = useState<string | null>(null);
 
   const authFetch = async (url: string | URL | globalThis.Request, options: RequestInit = {}) => {
       const headers = {
@@ -152,6 +158,28 @@ export default function App() {
     </div>
   );
 
+  const handleInvoiceClick = async (id: number) => {
+    setSelectedInvoiceId(id);
+    setInvoiceLoading(true);
+    setInvoiceError(null);
+    setInvoiceData(null);
+    try {
+      const response = await authFetch(`/api/invoice/${id}`);
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error('La factura no existe en el sistema o ha sido eliminada.');
+        }
+        throw new Error('Error al cargar los detalles de la factura.');
+      }
+      const data = await response.json();
+      setInvoiceData(data);
+    } catch (err: any) {
+      setInvoiceError(err.message || 'Error de red al conectar con el servidor.');
+    } finally {
+      setInvoiceLoading(false);
+    }
+  };
+
   const scrollToSection = (section: 'charts' | 'table') => {
     const ref = section === 'charts' ? chartsRef : tableRef;
     ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -250,7 +278,7 @@ export default function App() {
         {/* Table Section */}
         <div ref={tableRef} className="mt-2 mb-12 ml-4 mr-10 relative scroll-mt-16">
           <div className={`rounded-[1.5rem] border transition-all duration-500 overflow-visible ${dark ? 'bg-slate-900/40 border-slate-800 shadow-2xl' : 'bg-white border-slate-200 shadow-xl'}`}>
-            <DebtTable data={filteredData} />
+            <DebtTable data={filteredData} onInvoiceClick={handleInvoiceClick} />
           </div>
         </div>
       </main>
@@ -259,6 +287,15 @@ export default function App() {
         isOpen={showUserModal}
         onClose={() => setShowUserModal(false)}
         userInfo={user}
+      />
+
+      <InvoiceModal
+        isOpen={selectedInvoiceId !== null}
+        onClose={() => setSelectedInvoiceId(null)}
+        loading={invoiceLoading}
+        error={invoiceError}
+        invoice={invoiceData}
+        dark={dark}
       />
     </div>
   );
